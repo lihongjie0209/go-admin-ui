@@ -105,9 +105,9 @@ async function mount(component = Picker, values = {}) {
 }
 async function click(text) {
   const el = [...root.querySelectorAll('button')].find(
-    (b) => b.textContent === text,
+    (b) => b.textContent?.trim() === text,
   );
-  expect(el).toBeTruthy();
+  if (!el) throw new Error(`button ${text} not found in ${root.innerHTML}`);
   el.click();
   await flush();
 }

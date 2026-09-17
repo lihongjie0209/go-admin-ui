@@ -24,7 +24,11 @@ import { applyRequestContentType } from './request-content-type';
 
 const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
-function createRequestClient(baseURL: string, options?: RequestClientOptions) {
+function createRequestClient(
+  baseURL: string,
+  options?: RequestClientOptions,
+  authenticated = true,
+) {
   const client = new RequestClient({
     ...options,
     baseURL,
@@ -73,7 +77,9 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
     fulfilled: async (config) => {
       const accessStore = useAccessStore();
 
-      config.headers.Authorization = formatToken(accessStore.accessToken);
+      if (authenticated) {
+        config.headers.Authorization = formatToken(accessStore.accessToken);
+      }
       config.headers['Accept-Language'] = preferences.app.locale;
       // The browser must add the multipart boundary. A manually supplied
       // content type produces an invalid upload body.
@@ -92,15 +98,17 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   );
 
   // token过期的处理
-  client.addResponseInterceptor(
-    authenticateResponseInterceptor({
-      client,
-      doReAuthenticate,
-      doRefreshToken,
-      enableRefreshToken: preferences.app.enableRefreshToken,
-      formatToken,
-    }),
-  );
+  if (authenticated) {
+    client.addResponseInterceptor(
+      authenticateResponseInterceptor({
+        client,
+        doReAuthenticate,
+        doRefreshToken,
+        enableRefreshToken: preferences.app.enableRefreshToken,
+        formatToken,
+      }),
+    );
+  }
 
   // 通用的错误处理,如果没有进入上面的错误处理逻辑，就会进入这里
   client.addResponseInterceptor(
@@ -123,5 +131,13 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
 export const requestClient = createRequestClient(apiURL, {
   responseReturn: 'data',
 });
+
+// Credential exchange must never inherit a stale access token or recursively
+// trigger the access-token refresh interceptor.
+export const publicRequestClient = createRequestClient(
+  apiURL,
+  { responseReturn: 'data' },
+  false,
+);
 
 export const baseRequestClient = new RequestClient({ baseURL: apiURL });

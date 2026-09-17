@@ -61,7 +61,7 @@ async function flush() {
 
 function button(label) {
   return [...root.querySelectorAll('button')].find(
-    (item) => item.textContent === label,
+    (item) => item.textContent?.trim() === label,
   );
 }
 

@@ -17,11 +17,11 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: 'VbenInput',
       componentProps: {
-        placeholder: '请输入邮箱',
+        placeholder: '请输入用户名',
       },
       fieldName: 'username',
-      label: '邮箱',
-      rules: z.string().email({ message: '请输入有效的邮箱地址' }),
+      label: '用户名',
+      rules: z.string().min(1, { message: '请输入用户名' }),
     },
     {
       component: 'VbenInputPassword',

@@ -83,28 +83,34 @@ afterEach(() => {
 });
 
 it('在请求前校验长度和两次输入一致', async () => {
-  fill(0, 'short');
+  await submit();
+  expect(api.warning).toHaveBeenLastCalledWith('请输入当前密码');
+  expect(api.invoke).not.toHaveBeenCalled();
+  fill(0, 'TemporaryPassword1!');
   fill(1, 'short');
+  fill(2, 'short');
   await submit();
   expect(api.warning).toHaveBeenLastCalledWith('密码至少需要 12 个字符');
   expect(api.invoke).not.toHaveBeenCalled();
-  fill(0, 'LongPassword1!');
-  fill(1, 'DifferentPass1!');
+  fill(1, 'LongPassword1!');
+  fill(2, 'DifferentPass1!');
   await submit();
   expect(api.warning).toHaveBeenLastCalledWith('两次输入的密码不一致');
   expect(api.invoke).not.toHaveBeenCalled();
 });
 
 it('确认后通过受控接口修改密码，成功才退出且防止重复提交', async () => {
-  fill(0, 'LongPassword1!');
+  fill(0, 'TemporaryPassword1!');
   fill(1, 'LongPassword1!');
+  fill(2, 'LongPassword1!');
   const pending = deferred();
   api.invoke.mockReturnValue(pending.promise);
   root.querySelector('button').click();
   root.querySelector('button').click();
   await flush();
   expect(api.invoke).toHaveBeenCalledExactlyOnceWith('/auth/password/change', {
-    password: 'LongPassword1!',
+    new_password: 'LongPassword1!',
+    old_password: 'TemporaryPassword1!',
   });
   expect(root.querySelector('button').disabled).toBe(true);
   expect(api.logout).not.toHaveBeenCalled();
@@ -115,13 +121,14 @@ it('确认后通过受控接口修改密码，成功才退出且防止重复提�
 });
 
 it('修改失败保留输入且不退出，允许用户重试', async () => {
-  fill(0, 'LongPassword1!');
+  fill(0, 'TemporaryPassword1!');
   fill(1, 'LongPassword1!');
+  fill(2, 'LongPassword1!');
   api.invoke.mockRejectedValueOnce(new Error('新密码不能与近期密码重复'));
   await submit();
   expect(api.error).toHaveBeenCalledWith('新密码不能与近期密码重复');
   expect(api.logout).not.toHaveBeenCalled();
-  expect(root.querySelectorAll('input')[0].value).toBe('LongPassword1!');
+  expect(root.querySelectorAll('input')[1].value).toBe('LongPassword1!');
   await submit();
   expect(api.invoke).toHaveBeenCalledTimes(2);
   expect(api.logout).toHaveBeenCalledTimes(1);

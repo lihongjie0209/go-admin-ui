@@ -118,9 +118,9 @@ async function mount(overrides = {}) {
 }
 function button(text) {
   const el = [...root.querySelectorAll('button')].find(
-    (b) => b.textContent === text,
+    (b) => b.textContent?.trim() === text,
   );
-  expect(el).toBeTruthy();
+  if (!el) throw new Error(`button ${text} not found in ${root.innerHTML}`);
   return el;
 }
 beforeEach(() => {
@@ -180,7 +180,9 @@ it('读取失败禁止提交，重新加载恢复且保存失败保留选择', a
 it('只读隐藏保存，取消不写入', async () => {
   await mount({ readonly: true });
   expect(
-    [...root.querySelectorAll('button')].some((b) => b.textContent === '保存'),
+    [...root.querySelectorAll('button')].some(
+      (b) => b.textContent?.trim() === '保存',
+    ),
   ).toBe(false);
   expect(root.querySelector('input[type=checkbox]').disabled).toBe(true);
   button('取消').click();
