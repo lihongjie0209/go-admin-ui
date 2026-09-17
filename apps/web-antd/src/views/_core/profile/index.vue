@@ -52,6 +52,16 @@ const capabilities = [
     key: 'identity.profile:update',
     resource: 'identity.profile',
   },
+  {
+    action: 'change-password',
+    key: 'identity.credential:change-password',
+    resource: 'identity.credential',
+  },
+  {
+    action: 'list',
+    key: 'identity.session:list',
+    resource: 'identity.session',
+  },
 ];
 
 function applyProfile(value: NonNullable<typeof profile.value>) {
@@ -190,12 +200,16 @@ onScopeDispose(() => controller.abort());
               定期更新密码，并检查当前账号的登录会话。
             </p>
             <div class="flex flex-wrap gap-2">
-              <Button @click="router.push('/auth/change-password')">
-                修改密码
-              </Button>
-              <Button @click="router.push('/identity/sessions')">
-                会话管理
-              </Button>
+              <GoAccess action="change-password" resource="identity.credential">
+                <Button @click="router.push('/auth/change-password')">
+                  修改密码
+                </Button>
+              </GoAccess>
+              <GoAccess action="list" resource="identity.session">
+                <Button @click="router.push('/identity/sessions')">
+                  会话管理
+                </Button>
+              </GoAccess>
             </div>
           </Card>
         </div>
