@@ -42,6 +42,11 @@ const grantCapabilities = [
     key: 'tenant.application-grant:revoke',
     resource: 'tenant.application-grant',
   },
+  {
+    action: 'list',
+    key: 'application:list',
+    resource: 'application',
+  },
 ];
 const contract = {
   ...tenantPageContract,

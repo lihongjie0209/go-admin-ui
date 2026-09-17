@@ -68,6 +68,11 @@ const readCapability = usePageCapability({
   key: 'tenant.application-grant:read',
   resource: 'tenant.application-grant',
 });
+const applicationListCapability = usePageCapability({
+  action: 'list',
+  key: 'application:list',
+  resource: 'application',
+});
 const grants = ref<TenantApplicationGrant[]>([]);
 const applications = ref<ApplicationOption[]>([]);
 const applicationID = ref('');
@@ -122,6 +127,12 @@ function showDetail(record: TenantApplicationGrant) {
   detailOpen.value = true;
 }
 
+function loadApplicationOptions(signal: AbortSignal) {
+  if (!applicationListCapability.allowed.value) return Promise.resolve([]);
+  if (applications.value.length > 0) return Promise.resolve(applications.value);
+  return listActiveApplications(signal);
+}
+
 async function load() {
   if (!props.open || !props.tenant || !listCapability.allowed.value) return;
   controller?.abort();
@@ -143,9 +154,7 @@ async function load() {
         },
         currentController.signal,
       ),
-      applications.value.length > 0
-        ? Promise.resolve(applications.value)
-        : listActiveApplications(currentController.signal),
+      loadApplicationOptions(currentController.signal),
     ]);
     if (current !== generation) return;
     grants.value = grantPage.items;
@@ -277,7 +286,13 @@ onScopeDispose(() => {
       </template>
     </Alert>
 
-    <Form v-if="grantCapability.allowed.value" class="mb-4" layout="inline">
+    <Form
+      v-if="
+        grantCapability.allowed.value && applicationListCapability.allowed.value
+      "
+      class="mb-4"
+      layout="inline"
+    >
       <FormItem label="应用" required>
         <Select
           v-model:value="applicationID"
