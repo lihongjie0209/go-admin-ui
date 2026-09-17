@@ -7,12 +7,22 @@ import { dictionaryPageContract } from '#/modules/platform/resource-contracts';
 import FlatResourcePage from '#/templates/resource/FlatResourcePage.vue';
 
 const router = useRouter();
+const itemListCapability = {
+  action: 'list',
+  key: 'dictionary.item:list',
+  resource: 'dictionary.item',
+};
 const contract = {
   ...dictionaryPageContract,
+  capabilities: [
+    ...(dictionaryPageContract.capabilities ?? []),
+    itemListCapability,
+  ],
   table: {
     ...dictionaryPageContract.table,
     rowActions: [
       {
+        authorization: itemListCapability,
         deferred: true,
         key: 'items',
         label: '维护字典项',

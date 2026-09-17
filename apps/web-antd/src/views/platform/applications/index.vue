@@ -7,12 +7,22 @@ import { applicationPageContract } from '#/modules/platform/resource-contracts';
 import FlatResourcePage from '#/templates/resource/FlatResourcePage.vue';
 
 const router = useRouter();
+const navigationListCapability = {
+  action: 'list',
+  key: 'navigation:list',
+  resource: 'navigation',
+};
 const contract = {
   ...applicationPageContract,
+  capabilities: [
+    ...(applicationPageContract.capabilities ?? []),
+    navigationListCapability,
+  ],
   table: {
     ...applicationPageContract.table,
     rowActions: [
       {
+        authorization: navigationListCapability,
         deferred: true,
         key: 'navigations',
         label: '配置导航',

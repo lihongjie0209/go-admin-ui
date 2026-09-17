@@ -7,6 +7,11 @@ import { scheduledJobPageContract } from '#/modules/platform/resource-contracts'
 import FlatResourcePage from '#/templates/resource/FlatResourcePage.vue';
 
 const router = useRouter();
+const runListCapability = {
+  action: 'list',
+  key: 'scheduled-job:list',
+  resource: 'scheduled-job',
+};
 const contract = {
   ...scheduledJobPageContract,
   table: {
@@ -14,6 +19,7 @@ const contract = {
     rowActions: [
       ...(scheduledJobPageContract.table.rowActions ?? []),
       {
+        authorization: runListCapability,
         deferred: true,
         key: 'runs',
         label: '执行记录',
