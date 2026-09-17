@@ -18,13 +18,25 @@ const permissionsOpen = ref(false);
 const administratorsOpen = ref(false);
 const page = ref<InstanceType<typeof FlatResourcePage>>();
 const tenant = ref<{ id: string; name: string; version: number }>();
+const tenantGrantCapability = {
+  action: 'grant',
+  key: 'tenant:grant',
+  resource: 'tenant',
+};
+const tenantAdministratorCapability = {
+  action: 'assign-administrator',
+  key: 'tenant:assign-administrator',
+  resource: 'tenant',
+};
+const permissionListCapability = {
+  action: 'list',
+  key: 'permission.definition:list',
+  resource: 'permission.definition',
+};
 const authorizationCapabilities = [
-  { action: 'grant', key: 'tenant:grant', resource: 'tenant' },
-  {
-    action: 'assign-administrator',
-    key: 'tenant:assign-administrator',
-    resource: 'tenant',
-  },
+  tenantGrantCapability,
+  tenantAdministratorCapability,
+  permissionListCapability,
 ];
 const grantCapabilities = [
   {
@@ -60,7 +72,8 @@ const contract = {
     rowActions: [
       ...(tenantPageContract.table.rowActions ?? []),
       {
-        authorization: authorizationCapabilities[0],
+        additionalAuthorizations: [permissionListCapability],
+        authorization: tenantGrantCapability,
         deferred: true,
         key: 'permission-ceiling',
         label: '权限上限',
@@ -74,7 +87,7 @@ const contract = {
         },
       },
       {
-        authorization: authorizationCapabilities[1],
+        authorization: tenantAdministratorCapability,
         deferred: true,
         key: 'tenant-administrators',
         label: '租户管理员',

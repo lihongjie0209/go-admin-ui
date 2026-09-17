@@ -29,6 +29,18 @@ const contract = {
     ...tenantRolePageContract.table,
     rowActions: [
       {
+        additionalAuthorizations: [
+          {
+            action: 'read',
+            key: 'tenant.role:read',
+            resource: 'tenant.role',
+          },
+          {
+            action: 'read',
+            key: 'tenant.authorization:read',
+            resource: 'tenant.authorization',
+          },
+        ],
         authorization: grantCapability,
         deferred: true,
         key: 'grant',

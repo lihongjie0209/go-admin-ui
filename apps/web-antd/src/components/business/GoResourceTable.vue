@@ -78,12 +78,13 @@ const rowCapabilities = useRowCapabilities(
 );
 const authorizedRowActions = props.rowActions.map((action) => ({
   action,
-  capability: action.authorization
-    ? usePageCapability(action.authorization)
-    : undefined,
+  capabilities: [
+    ...(action.authorization ? [action.authorization] : []),
+    ...(action.additionalAuthorizations ?? []),
+  ].map((authorization) => usePageCapability(authorization)),
 }));
 const visibleRowActions = computed(() =>
-  authorizedRowActions.map(({ action, capability }) => ({
+  authorizedRowActions.map(({ action, capabilities }) => ({
     ...action,
     run: (row: Record<string, unknown>) =>
       runFrontendAction(
@@ -93,7 +94,7 @@ const visibleRowActions = computed(() =>
         () => action.run(row),
       ),
     visible: (row: Record<string, unknown>) =>
-      (capability?.allowed.value ?? true) &&
+      capabilities.every((capability) => capability.allowed.value) &&
       (!action.rowAuthorization ||
         (action.authorization?.resource === props.authorizationResource &&
           rowCapabilities.allowed(

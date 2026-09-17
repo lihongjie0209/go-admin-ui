@@ -12,6 +12,8 @@ export interface GridColumn {
 }
 
 export interface GridRowAction {
+  /** Every listed page capability must allow the action to be rendered. */
+  additionalAuthorizations?: CapabilityRequest[];
   authorization?: CapabilityRequest;
   confirm?: ((row: Record<string, unknown>) => string) | string;
   danger?: boolean;

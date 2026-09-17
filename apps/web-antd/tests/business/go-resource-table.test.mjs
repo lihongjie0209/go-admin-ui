@@ -89,6 +89,11 @@ const capabilities = ['list', 'create', 'update', 'delete', 'assign-role'].map(
     resource: 'tenant.member',
   }),
 );
+capabilities.push({
+  action: 'list',
+  key: 'tenant.role:list',
+  resource: 'tenant.role',
+});
 
 let app;
 let resourceTable;
@@ -123,6 +128,13 @@ async function mount() {
               },
               rowActions: [
                 {
+                  additionalAuthorizations: [
+                    {
+                      action: 'list',
+                      key: 'tenant.role:list',
+                      resource: 'tenant.role',
+                    },
+                  ],
                   authorization: {
                     action: 'assign-role',
                     key: 'tenant.member:assign-role',
@@ -290,6 +302,22 @@ describe('go resource table integration', () => {
       },
       expect.any(Function),
     );
+  });
+
+  it('hides cross-resource actions when any additional capability is denied', async () => {
+    state.evaluate.mockResolvedValueOnce({
+      items: capabilities.map(({ key }) => ({
+        allowed: key !== 'tenant.role:list',
+        key,
+      })),
+      revision: 'policy-2',
+    });
+    await mount();
+    await state.childProps.dataProvider({ filters: {}, page: 1, pageSize: 20 });
+    await flush();
+
+    expect(state.childProps.rowActions[0].visible({ id: 'row-1' })).toBe(false);
+    expect(state.track).not.toHaveBeenCalled();
   });
 
   it('applies row decisions to custom actions that opt into object authorization', async () => {

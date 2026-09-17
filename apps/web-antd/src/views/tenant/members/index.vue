@@ -21,6 +21,11 @@ const effectivePermissionCapability = {
   key: 'tenant.authorization:read',
   resource: 'tenant.authorization',
 };
+const roleListCapability = {
+  action: 'list',
+  key: 'tenant.role:list',
+  resource: 'tenant.role',
+};
 const contract = {
   ...tenantMemberPageContract,
   capabilities: [
@@ -31,6 +36,7 @@ const contract = {
       resource: 'tenant.member',
     },
     effectivePermissionCapability,
+    roleListCapability,
   ],
   table: {
     ...tenantMemberPageContract.table,
@@ -46,6 +52,7 @@ const contract = {
         },
       },
       {
+        additionalAuthorizations: [roleListCapability],
         authorization: {
           action: 'assign-role',
           key: 'tenant.member:assign-role',

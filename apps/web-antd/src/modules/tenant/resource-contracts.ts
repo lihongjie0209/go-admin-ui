@@ -293,6 +293,11 @@ export const tenantDepartmentTreeContract: TreeResourcePageContract = {
       key: 'tenant.department:assign-member',
       resource: 'tenant.department',
     },
+    {
+      action: 'list',
+      key: 'tenant.member:list',
+      resource: 'tenant.member',
+    },
   ],
   editorFields: [
     { component: 'hidden', field: 'parent_id', label: '父部门 ID' },

@@ -8,6 +8,7 @@ import { Page } from '@vben/common-ui';
 import { Button } from 'ant-design-vue';
 
 import DepartmentMemberAssignmentDrawer from '#/components/business/tenant/DepartmentMemberAssignmentDrawer.vue';
+import GoAccess from '#/components/foundation/GoAccess.vue';
 import { tenantDepartmentTreeContract } from '#/modules/tenant/resource-contracts';
 import TreeResourcePage from '#/templates/resource/TreeResourcePage.vue';
 
@@ -27,13 +28,15 @@ function openAssignment(department: NormalizedTreeRecord) {
   >
     <TreeResourcePage :contract="tenantDepartmentTreeContract">
       <template #toolbar="{ rowAllowed, selected }">
-        <Button
-          v-if="selected"
-          :disabled="!rowAllowed(selected.id, 'assign-member')"
-          @click="openAssignment(selected)"
-        >
-          分配成员
-        </Button>
+        <GoAccess action="list" resource="tenant.member">
+          <Button
+            v-if="selected"
+            :disabled="!rowAllowed(selected.id, 'assign-member')"
+            @click="openAssignment(selected)"
+          >
+            分配成员
+          </Button>
+        </GoAccess>
       </template>
     </TreeResourcePage>
     <DepartmentMemberAssignmentDrawer
