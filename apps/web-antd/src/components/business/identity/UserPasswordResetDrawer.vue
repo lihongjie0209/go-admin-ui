@@ -125,6 +125,7 @@ watch(
       >
         <Input.Password
           v-model:value="password"
+          aria-label="新密码"
           autocomplete="new-password"
           :disabled="saving"
           placeholder="至少 12 个字节"
@@ -138,6 +139,7 @@ watch(
       >
         <Input.Password
           v-model:value="confirmation"
+          aria-label="确认新密码"
           autocomplete="new-password"
           :disabled="saving"
           placeholder="再次输入新密码"

@@ -12,7 +12,8 @@ describe('page.vue', () => {
       },
     });
 
-    expect(wrapper.text()).toContain('Test Title');
+    const heading = wrapper.get('h1');
+    expect(heading.text()).toBe('Test Title');
   });
 
   it('renders description when passed', () => {

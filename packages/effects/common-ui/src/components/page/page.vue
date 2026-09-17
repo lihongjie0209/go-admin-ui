@@ -61,9 +61,9 @@ const contentStyle = computed<StyleValue>(() => {
     >
       <div class="flex-auto">
         <slot name="title">
-          <div v-if="title" class="mb-2 flex text-lg font-semibold">
+          <h1 v-if="title" class="mb-2 flex text-lg font-semibold">
             {{ title }}
-          </div>
+          </h1>
         </slot>
 
         <slot name="description">
