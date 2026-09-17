@@ -11,6 +11,7 @@ import { notification } from 'ant-design-vue';
 import { defineStore } from 'pinia';
 
 import { getAccessCodesApi, getUserInfoApi, loginApi, logoutApi } from '#/api';
+import { clearApplicationContext } from '#/api/core/menu';
 import { resolveInitialTenantContext } from '#/api/go';
 import { $t } from '#/locales';
 
@@ -38,6 +39,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       // 如果成功获取到 accessToken
       if (accessToken) {
+        clearApplicationContext();
         accessStore.setAccessToken(accessToken);
         if (mustChangePassword) {
           await router.replace('/auth/change-password');
@@ -93,6 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
     } catch {
       // 不做任何处理
     }
+    clearApplicationContext();
     resetAllStores();
     accessStore.setLoginExpired(false);
 

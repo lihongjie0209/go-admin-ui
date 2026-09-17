@@ -3,6 +3,7 @@ import type { NavigationApplication } from './menu';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  clearApplicationContext,
   getApplicationHomePath,
   getMyMenuUsage,
   getNavigationApplications,
@@ -62,6 +63,42 @@ describe('application navigation', () => {
       { home_path: '/app/platform/users', key: 'platform' },
       { home_path: '/app/reports/overview', key: 'reports' },
     ]);
+  });
+
+  it('clears cached and persisted state when the principal boundary changes', async () => {
+    post
+      .mockResolvedValueOnce([
+        {
+          code: 'first-user',
+          home_path: '',
+          icon: '',
+          id: 'app-1',
+          name: '前一用户应用',
+          sort_order: 1,
+        },
+      ])
+      .mockResolvedValueOnce([]);
+    localStorage.setItem('go-admin.current-application', 'first-user');
+    localStorage.setItem('go-admin.current-menu-id', 'menu-1');
+    localStorage.setItem('unrelated', 'keep');
+    sessionStorage.setItem(
+      'go-admin.application-tabs:first-user',
+      JSON.stringify([{ path: '/app/first-user/home' }]),
+    );
+    sessionStorage.setItem('unrelated', 'keep');
+
+    await expect(getNavigationApplications()).resolves.toHaveLength(1);
+    clearApplicationContext();
+    await expect(getNavigationApplications()).resolves.toEqual([]);
+
+    expect(post).toHaveBeenCalledTimes(2);
+    expect(localStorage.getItem('go-admin.current-application')).toBeNull();
+    expect(localStorage.getItem('go-admin.current-menu-id')).toBeNull();
+    expect(
+      sessionStorage.getItem('go-admin.application-tabs:first-user'),
+    ).toBeNull();
+    expect(localStorage.getItem('unrelated')).toBe('keep');
+    expect(sessionStorage.getItem('unrelated')).toBe('keep');
   });
 
   it('uses a configured page as home and rejects paths outside registered menus', () => {

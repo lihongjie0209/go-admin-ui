@@ -46,6 +46,8 @@ const navigationCache = new Map<
   { expiresAt: number; value: NavigationApplication[] }
 >();
 const currentApplicationStorageKey = 'go-admin.current-application';
+const currentMenuStorageKey = 'go-admin.current-menu-id';
+const applicationTabStoragePrefix = 'go-admin.application-tabs:';
 
 interface CurrentApplicationResponse {
   code: string;
@@ -134,6 +136,22 @@ export async function getMyMenuUsage() {
 
 export function invalidateApplicationCache() {
   navigationCache.clear();
+}
+
+/**
+ * Clears every principal- and tenant-scoped application artifact.
+ * Call this whenever the authenticated principal or tenant boundary changes.
+ */
+export function clearApplicationContext() {
+  invalidateApplicationCache();
+  localStorage.removeItem(currentApplicationStorageKey);
+  localStorage.removeItem(currentMenuStorageKey);
+  for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
+    const key = sessionStorage.key(index);
+    if (key?.startsWith(applicationTabStoragePrefix)) {
+      sessionStorage.removeItem(key);
+    }
+  }
 }
 
 export async function getCurrentApplication() {

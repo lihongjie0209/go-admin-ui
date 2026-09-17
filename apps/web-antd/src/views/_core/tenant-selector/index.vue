@@ -10,7 +10,7 @@ import { useAccessStore, useTabbarStore } from '@vben/stores';
 
 import { Button, Empty, Input, message, Spin, Tag } from 'ant-design-vue';
 
-import { invalidateApplicationCache } from '#/api/core/menu';
+import { clearApplicationContext } from '#/api/core/menu';
 import {
   getAvailableTenantContexts,
   getPersistedTenantContext,
@@ -61,15 +61,7 @@ async function selectTenant(tenant: AvailableTenantContext) {
     const result = await switchTenantContext(tenant.tenant_id);
     accessStore.setAccessToken(result.access_token);
     currentTenantID.value = tenant.tenant_id;
-    localStorage.removeItem('go-admin.current-application');
-    localStorage.removeItem('go-admin.current-menu-id');
-    for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
-      const key = sessionStorage.key(index);
-      if (key?.startsWith('go-admin.application-tabs:')) {
-        sessionStorage.removeItem(key);
-      }
-    }
-    invalidateApplicationCache();
+    clearApplicationContext();
     invalidateDictionaryCache();
     tabbarStore.$reset();
     resetRoutes();
