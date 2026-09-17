@@ -1,6 +1,5 @@
 import { createApp, watchEffect } from 'vue';
 
-import { registerAccessDirective } from '@vben/access';
 import { registerLoadingDirective } from '@vben/common-ui/es/loading';
 import { addCollection } from '@vben/icons';
 import { preferences } from '@vben/preferences';
@@ -54,9 +53,6 @@ async function bootstrap(namespace: string) {
 
   // 配置 pinia-tore
   await initStores(app, { namespace });
-
-  // 安装权限指令
-  registerAccessDirective(app);
 
   // 初始化 tippy
   const { initTippy } = await import('@vben/common-ui/es/tippy');

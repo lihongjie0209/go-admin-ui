@@ -81,8 +81,3 @@ export async function logoutApi() {
     clearPersistedTenantContext();
   }
 }
-
-// Concrete modules register Resource/Action capability requests when added.
-export async function getAccessCodesApi() {
-  return [] as string[];
-}

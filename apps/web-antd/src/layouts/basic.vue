@@ -13,7 +13,6 @@ import { useAccessStore, useUserStore } from '@vben/stores';
 
 import { Button } from 'ant-design-vue';
 
-import { getAccessCodesApi } from '#/api';
 import { getNavigationApplications, selectApplication } from '#/api/core/menu';
 import { getPersistedTenantContext } from '#/api/go/tenant-context-storage';
 import GoApplicationSwitcher from '#/components/business/GoApplicationSwitcher.vue';
@@ -57,18 +56,9 @@ async function syncApplicationFromRoute(path: string) {
   if (application) await selectApplication(application.key);
 }
 
-async function refreshAccessCodes() {
-  try {
-    accessStore.setAccessCodes(await getAccessCodesApi());
-  } catch {
-    // 会话初始化或组织切换过程中可能暂时不可用，路由守卫仍会负责鉴权。
-  }
-}
-
 onMounted(() => {
   window.addEventListener('go-admin:tenant-context-changed', syncTenantContext);
   void syncApplicationFromRoute(route.path);
-  void refreshAccessCodes();
 });
 onBeforeUnmount(() => {
   window.removeEventListener(
