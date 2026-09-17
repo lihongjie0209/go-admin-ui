@@ -26,6 +26,7 @@ import {
 
 import GoDateTimeText from '#/components/foundation/GoDateTimeText.vue';
 import GoPagination from '#/components/foundation/GoPagination.vue';
+import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
 import {
   findTenantApplicationGrant,
@@ -46,6 +47,7 @@ const emit = defineEmits<{
   'update:open': [value: boolean];
 }>();
 
+const runFrontendAction = useFrontendAction();
 const listCapability = usePageCapability({
   action: 'list',
   key: 'tenant.application-grant:list',
@@ -162,20 +164,26 @@ async function load() {
 }
 
 async function saveGrant() {
-  if (!props.tenant || !applicationID.value || saving.value) return;
+  const tenant = props.tenant;
+  if (!tenant || !applicationID.value || saving.value) return;
   saving.value = true;
   try {
     const existing = await findTenantApplicationGrant(
-      props.tenant.id,
+      tenant.id,
       applicationID.value,
     );
-    await grantTenantApplication({
-      application_id: applicationID.value,
-      expires_at: validity.value?.[1]?.toISOString() ?? null,
-      starts_at: validity.value?.[0]?.toISOString() ?? null,
-      tenant_id: props.tenant.id,
-      version: existing?.version ?? 0,
-    });
+    await runFrontendAction(
+      'tenant.application-grant:grant',
+      applicationID.value,
+      () =>
+        grantTenantApplication({
+          application_id: applicationID.value,
+          expires_at: validity.value?.[1]?.toISOString() ?? null,
+          starts_at: validity.value?.[0]?.toISOString() ?? null,
+          tenant_id: tenant.id,
+          version: existing?.version ?? 0,
+        }),
+    );
     message.success('租户应用授权已保存');
     emit('changed');
     await load();
@@ -187,8 +195,11 @@ async function saveGrant() {
 }
 
 async function revoke(record: Record<string, unknown>) {
+  const grant = record as TenantApplicationGrant;
   try {
-    await revokeTenantApplication(record as TenantApplicationGrant);
+    await runFrontendAction('tenant.application-grant:revoke', grant.id, () =>
+      revokeTenantApplication(grant),
+    );
     message.success('应用授权已撤销');
     emit('changed');
     await load();

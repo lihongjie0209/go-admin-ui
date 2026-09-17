@@ -20,6 +20,7 @@ import {
 
 import GoDateTimeText from '#/components/foundation/GoDateTimeText.vue';
 import GoPagination from '#/components/foundation/GoPagination.vue';
+import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
 import {
   createPolicyVersion,
@@ -43,6 +44,7 @@ const emit = defineEmits<{
   'update:open': [value: boolean];
 }>();
 
+const runFrontendAction = useFrontendAction();
 const resource = computed(() => policyAuthorizationResource(props.kind));
 const createVersionCapability = usePageCapability({
   action: 'create-version',
@@ -126,8 +128,13 @@ function createDraft() {
 }
 
 async function saveDraft(document: string) {
-  if (!props.policy) return;
-  return await createPolicyVersion(props.kind, props.policy, document);
+  const policy = props.policy;
+  if (!policy) return;
+  return await runFrontendAction(
+    `${resource.value}:create-version`,
+    policy.id,
+    () => createPolicyVersion(props.kind, policy, document),
+  );
 }
 
 function draftSaved() {
@@ -137,8 +144,11 @@ function draftSaved() {
 }
 
 async function publish(version: PolicyVersionRecord) {
-  if (!props.policy) return;
-  await publishPolicyVersion(props.kind, props.policy, version.version_number);
+  const policy = props.policy;
+  if (!policy) return;
+  await runFrontendAction(`${resource.value}:publish`, policy.id, () =>
+    publishPolicyVersion(props.kind, policy, version.version_number),
+  );
   message.success('策略版本已发布');
   emit('changed');
   emit('update:open', false);
@@ -172,11 +182,9 @@ async function runSimulation(
   signal?: AbortSignal,
 ) {
   if (!selectedVersion.value) throw new Error('请选择策略版本');
-  return await simulatePolicy(
-    props.kind,
-    selectedVersion.value.document,
-    input,
-    signal,
+  const version = selectedVersion.value;
+  return await runFrontendAction(`${resource.value}:simulate`, version.id, () =>
+    simulatePolicy(props.kind, version.document, input, signal),
   );
 }
 
