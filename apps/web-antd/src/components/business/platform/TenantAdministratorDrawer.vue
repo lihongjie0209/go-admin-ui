@@ -20,6 +20,7 @@ import {
 
 import GoDateTimeText from '#/components/foundation/GoDateTimeText.vue';
 import GoPagination from '#/components/foundation/GoPagination.vue';
+import { useFrontendAction } from '#/composables/use-frontend-action';
 import {
   pageAdministratorCandidates,
   setTenantAdministrator,
@@ -38,6 +39,7 @@ const emit = defineEmits<{
   'update:open': [value: boolean];
 }>();
 
+const runFrontendAction = useFrontendAction();
 const items = ref<AdministratorCandidate[]>([]);
 const keyword = ref('');
 const status = ref('');
@@ -109,16 +111,24 @@ async function setAdministrator(
   enabled: boolean,
 ) {
   const record = source as unknown as AdministratorCandidate;
-  if (!props.tenant || mutating.value.has(record.membership_id)) return;
+  const tenant = props.tenant;
+  if (!tenant || mutating.value.has(record.membership_id)) return;
   mutating.value = new Set(mutating.value).add(record.membership_id);
   try {
-    await setTenantAdministrator(
-      {
-        enabled,
-        membership_id: record.membership_id,
-        tenant_id: props.tenant.id,
-      },
-      props.scope,
+    await runFrontendAction(
+      props.scope === 'platform'
+        ? 'tenant:assign-administrator'
+        : 'tenant.authorization:assign-administrator',
+      record.membership_id,
+      () =>
+        setTenantAdministrator(
+          {
+            enabled,
+            membership_id: record.membership_id,
+            tenant_id: tenant.id,
+          },
+          props.scope,
+        ),
     );
     message.success(enabled ? '已设为租户管理员' : '已取消租户管理员');
     emit('changed');

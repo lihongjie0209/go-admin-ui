@@ -3,10 +3,10 @@ import type { GoResourceTableProps } from './go-resource-types';
 
 import type { VersionedRecord } from '#/api/go';
 
-import { computed, inject, onScopeDispose, ref, watch } from 'vue';
-import { routeLocationKey } from 'vue-router';
+import { computed, onScopeDispose, ref, watch } from 'vue';
 
-import { createResourceApi, trackFrontendAction } from '#/api/go';
+import { createResourceApi } from '#/api/go';
+import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
 import { useRowCapabilities } from '#/composables/use-pbac';
 
@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<GoResourceTableProps>(), {
 });
 
 const table = ref<InstanceType<typeof GoDataGrid>>();
-const route = inject(routeLocationKey, null);
+const runFrontendAction = useFrontendAction();
 const rowIds = ref<string[]>([]);
 let pageGeneration = 0;
 let pageController: AbortController | undefined;
@@ -114,14 +114,18 @@ onScopeDispose(() => {
 });
 
 async function remove(row: Record<string, unknown>) {
-  await trackFrontendAction(actionEvent('delete', String(row.id ?? '')), () =>
-    api.delete(row as Record<string, unknown> & VersionedRecord),
+  await runFrontendAction(
+    `${props.authorizationResource}:delete`,
+    String(row.id ?? ''),
+    () => api.delete(row as Record<string, unknown> & VersionedRecord),
   );
 }
 
 async function createRecord(values: Record<string, unknown>) {
-  return await trackFrontendAction(actionEvent('create'), () =>
-    api.create(values),
+  return await runFrontendAction(
+    `${props.authorizationResource}:create`,
+    '',
+    () => api.create(values),
   );
 }
 
@@ -129,19 +133,11 @@ async function updateRecord(
   values: Record<string, unknown>,
   row: Record<string, unknown>,
 ) {
-  return await trackFrontendAction(
-    actionEvent('update', String(row.id ?? '')),
+  return await runFrontendAction(
+    `${props.authorizationResource}:update`,
+    String(row.id ?? ''),
     () => api.update(values, row as Record<string, unknown> & VersionedRecord),
   );
-}
-
-function actionEvent(action: string, resourceID = '') {
-  return {
-    application_id: String(route?.meta.applicationId ?? ''),
-    event_name: `${props.authorizationResource}:${action}`,
-    page_route: route?.path ?? '',
-    resource_id: resourceID,
-  };
 }
 
 defineExpose({

@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import type { CapabilityRequest } from '#/api/go';
 
-import { inject, ref } from 'vue';
-import { routeLocationKey } from 'vue-router';
+import { ref } from 'vue';
 
 import { Button, message, Popconfirm } from 'ant-design-vue';
 
-import { trackFrontendAction } from '#/api/go';
+import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
 
 const props = withDefaults(
@@ -28,7 +27,7 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{ completed: [] }>();
-const route = inject(routeLocationKey, null);
+const runFrontendAction = useFrontendAction();
 const capability = usePageCapability(props.authorization);
 const loading = ref(false);
 
@@ -36,13 +35,9 @@ async function execute() {
   if (!capability.allowed.value || loading.value) return;
   loading.value = true;
   try {
-    await trackFrontendAction(
-      {
-        application_id: String(route?.meta.applicationId ?? ''),
-        event_name: props.authorization.key,
-        page_route: route?.path ?? '',
-        resource_id: props.resourceId ?? '',
-      },
+    await runFrontendAction(
+      props.authorization.key,
+      props.resourceId ?? '',
       props.run,
     );
     message.success(props.successMessage);

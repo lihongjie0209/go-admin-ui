@@ -14,6 +14,7 @@ import {
   Popconfirm,
 } from 'ant-design-vue';
 
+import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
 import {
   resetUserPassword,
@@ -29,6 +30,7 @@ const emit = defineEmits<{
   'update:open': [value: boolean];
 }>();
 
+const runFrontendAction = useFrontendAction();
 const capability = usePageCapability({
   action: 'reset-password',
   key: 'identity.user:reset-password',
@@ -57,13 +59,16 @@ function close() {
 }
 
 async function submit() {
-  if (!props.user || !capability.allowed.value || saving.value) return;
+  const user = props.user;
+  if (!user || !capability.allowed.value || saving.value) return;
   errors.value = validateResetPassword(password.value, confirmation.value);
   if (Object.keys(errors.value).length > 0) return;
   saving.value = true;
   failure.value = '';
   try {
-    await resetUserPassword(props.user.id, password.value);
+    await runFrontendAction('identity.user:reset-password', user.id, () =>
+      resetUserPassword(user.id, password.value),
+    );
     message.success('密码已重置，用户现有会话已撤销');
     clearSensitiveState();
     emit('saved');

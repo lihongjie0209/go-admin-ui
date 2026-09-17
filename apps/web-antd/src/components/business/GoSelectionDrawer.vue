@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { inject, onScopeDispose, ref, watch } from 'vue';
-import { routeLocationKey } from 'vue-router';
+import { onScopeDispose, ref, watch } from 'vue';
 
 import {
   Alert,
@@ -12,7 +11,7 @@ import {
   Transfer,
 } from 'ant-design-vue';
 
-import { trackFrontendAction } from '#/api/go';
+import { useFrontendAction } from '#/composables/use-frontend-action';
 
 export interface SelectionItem {
   description?: string;
@@ -46,7 +45,7 @@ const emit = defineEmits<{
   'update:open': [value: boolean];
 }>();
 
-const route = inject(routeLocationKey, null);
+const runFrontendAction = useFrontendAction();
 const items = ref<SelectionItem[]>([]);
 const selected = ref<string[]>([]);
 const loading = ref(false);
@@ -86,13 +85,9 @@ async function saveSelection() {
   if (saving.value) return;
   saving.value = true;
   try {
-    await trackFrontendAction(
-      {
-        application_id: String(route?.meta.applicationId ?? ''),
-        event_name: props.telemetry.eventName,
-        page_route: route?.path ?? '',
-        resource_id: props.telemetry.resourceId,
-      },
+    await runFrontendAction(
+      props.telemetry.eventName,
+      props.telemetry.resourceId,
       () => props.save([...selected.value]),
     );
     message.success('分配已保存');

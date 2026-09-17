@@ -9,8 +9,7 @@ import type {
   TreeRecord,
 } from '#/components/foundation/tree-contract';
 
-import { computed, inject, onScopeDispose, ref, watch } from 'vue';
-import { routeLocationKey } from 'vue-router';
+import { computed, onScopeDispose, ref, watch } from 'vue';
 
 import {
   Alert,
@@ -24,7 +23,6 @@ import {
   Tree,
 } from 'ant-design-vue';
 
-import { trackFrontendAction } from '#/api/go';
 import { createTreeResourceApi } from '#/api/go/tree-resource';
 import {
   canMoveTreeNode,
@@ -32,6 +30,7 @@ import {
   flattenTree,
   normalizeTree,
 } from '#/components/foundation/tree-contract';
+import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
 import { useRowCapabilities } from '#/composables/use-pbac';
 
@@ -64,7 +63,7 @@ const emit = defineEmits<{
   select: [node: NormalizedTreeRecord | null];
 }>();
 
-const route = inject(routeLocationKey, null);
+const runFrontendAction = useFrontendAction();
 const api = createTreeResourceApi<TreeRecord & VersionedRecord>({
   endpoints: props.endpoints,
   toTreeRequest: props.mapTreeRequest,
@@ -183,8 +182,10 @@ function selectNode(keys: Array<number | string>) {
 }
 
 async function createNode(values: Record<string, unknown>) {
-  const result = await trackFrontendAction(actionEvent('create'), () =>
-    api.create(values),
+  const result = await runFrontendAction(
+    `${props.authorizationResource}:create`,
+    '',
+    () => api.create(values),
   );
   await load();
   return result;
@@ -204,8 +205,9 @@ async function updateNode(
   ) {
     throw new Error('不能将节点移动到自身、后代或不存在的父节点下');
   }
-  const result = await trackFrontendAction(
-    actionEvent('update', current.id),
+  const result = await runFrontendAction(
+    `${props.authorizationResource}:update`,
+    current.id,
     () => api.update(values, current as TreeRecord & VersionedRecord),
   );
   await load();
@@ -214,20 +216,13 @@ async function updateNode(
 
 async function deleteNode(current: NormalizedTreeRecord) {
   if (current.children.length > 0) throw new Error('只能删除叶子节点');
-  await trackFrontendAction(actionEvent('delete', current.id), () =>
-    api.delete(current as TreeRecord & VersionedRecord),
+  await runFrontendAction(
+    `${props.authorizationResource}:delete`,
+    current.id,
+    () => api.delete(current as TreeRecord & VersionedRecord),
   );
   selectedID.value = '';
   await load();
-}
-
-function actionEvent(action: string, resourceID = '') {
-  return {
-    application_id: String(route?.meta.applicationId ?? ''),
-    event_name: `${props.authorizationResource}:${action}`,
-    page_route: route?.path ?? '',
-    resource_id: resourceID,
-  };
 }
 
 async function removeSelected() {

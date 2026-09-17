@@ -18,6 +18,7 @@ import {
 } from 'ant-design-vue';
 
 import GoDateTimeText from '#/components/foundation/GoDateTimeText.vue';
+import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
 import {
   loadDepartmentMemberAssignment,
@@ -30,6 +31,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ 'update:open': [open: boolean] }>();
 
+const runFrontendAction = useFrontendAction();
 const capability = usePageCapability({
   action: 'assign-member',
   key: 'tenant.department:assign-member',
@@ -112,14 +114,20 @@ function onSelectionChange(keys: Array<number | string>) {
 }
 
 async function save() {
-  if (!props.department || !capability.allowed.value || saving.value) return;
+  const department = props.department;
+  if (!department || !capability.allowed.value || saving.value) return;
   saving.value = true;
   try {
-    await saveDepartmentMemberAssignment({
-      departmentID: props.department.id,
-      membershipIDs: selectedIDs.value,
-      primaryMembershipID: primaryID.value || undefined,
-    });
+    await runFrontendAction(
+      'tenant.department:assign-member',
+      department.id,
+      () =>
+        saveDepartmentMemberAssignment({
+          departmentID: department.id,
+          membershipIDs: selectedIDs.value,
+          primaryMembershipID: primaryID.value || undefined,
+        }),
+    );
     message.success('部门成员已更新');
     close();
   } catch (error) {
