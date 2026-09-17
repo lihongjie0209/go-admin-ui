@@ -1063,7 +1063,7 @@ export function navigationTreeContract(
       {
         field: 'route_path',
         label: '路由路径',
-        placeholder: '/app/platform/users',
+        placeholder: '/users 或 /reports/monthly（相对于父目录）',
         validate: requiredForMenu('路由路径', /^\/[A-Za-z0-9_./:-]*$/),
       },
       {

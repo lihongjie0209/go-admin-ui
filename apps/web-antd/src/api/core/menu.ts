@@ -276,11 +276,11 @@ function buildMenuTree(
     menu: NavigationMenu,
     parentPath = `/app/${application.key}`,
   ): RouteRecordStringComponent => {
-    const segment =
-      String(menu.route_path ?? menu.key)
-        .split('/')
-        .findLast((value) => value.length > 0) ?? menu.key;
-    const path = `${parentPath}/${segment}`;
+    const relativePath = String(menu.route_path || menu.key)
+      .split('/')
+      .filter(Boolean)
+      .join('/');
+    const path = `${parentPath}/${relativePath || menu.key}`;
     const route = {
       meta: {
         icon: menu.icon || undefined,

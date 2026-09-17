@@ -157,4 +157,44 @@ describe('application navigation', () => {
       }),
     ).toBe('/app/platform/settings/users');
   });
+
+  it('preserves every segment in an application-relative menu path', () => {
+    const application: NavigationApplication = {
+      description: '',
+      home_path: '/app/platform/settings/reports/monthly',
+      icon: null,
+      id: 'app-1',
+      key: 'platform',
+      name: '平台',
+      type: 'platform',
+      menus: [
+        {
+          component: null,
+          icon: null,
+          id: 'directory-1',
+          key: 'settings',
+          name: '设置',
+          parent_id: null,
+          route_path: '/settings',
+          sort_order: 10,
+          type: 'directory',
+        },
+        {
+          component: 'platform/runtime/index',
+          icon: null,
+          id: 'menu-1',
+          key: 'monthly-report',
+          name: '月报',
+          parent_id: 'directory-1',
+          route_path: '/reports/monthly',
+          sort_order: 10,
+          type: 'menu',
+        },
+      ],
+    };
+
+    expect(getApplicationHomePath(application)).toBe(
+      '/app/platform/settings/reports/monthly',
+    );
+  });
 });
