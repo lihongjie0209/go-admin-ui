@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { NavigationApplication, NavigationMenu } from '#/api/core/menu';
+import type { NavigationApplication } from '#/api/core/menu';
 
 import { computed, onBeforeUnmount, onDeactivated, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -18,6 +18,7 @@ import {
 } from 'ant-design-vue';
 
 import {
+  getApplicationHomePath,
   getMyMenuUsage,
   getNavigationApplications,
   selectApplication,
@@ -74,26 +75,6 @@ const paginated = computed(() => {
   return filtered.value.slice(offset, offset + pageSize);
 });
 
-function firstMenuPath(application: NavigationApplication) {
-  const menus = application.menus;
-  const menuMap = new Map(menus.map((menu) => [menu.id, menu]));
-  const page = menus
-    .toSorted((left, right) => left.sort_order - right.sort_order)
-    .find((menu) => menu.component);
-  if (!page) return '/apps';
-  const segments: string[] = [];
-  let menu: NavigationMenu | undefined = page;
-  while (menu) {
-    segments.unshift(
-      String(menu.route_path ?? menu.key)
-        .split('/')
-        .findLast(Boolean) ?? menu.key,
-    );
-    menu = menu.parent_id ? menuMap.get(menu.parent_id) : undefined;
-  }
-  return `/app/${application.key}/${segments.join('/')}`;
-}
-
 async function switchTo(application: NavigationApplication) {
   if (switching.value) return;
   if (application.key === props.currentApplicationKey) {
@@ -125,7 +106,7 @@ async function switchTo(application: NavigationApplication) {
     if (current !== switchGeneration) return;
     const target = targetState?.lastPath?.startsWith(prefix)
       ? targetState.lastPath
-      : firstMenuPath(application);
+      : getApplicationHomePath(application);
     tabbarStore.$reset();
     tabbarStore.tabs = (targetState?.tabs ?? []).filter((tab) =>
       tab.path.startsWith(prefix),

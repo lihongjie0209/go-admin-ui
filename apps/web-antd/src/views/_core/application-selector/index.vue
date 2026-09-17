@@ -19,6 +19,7 @@ import {
 } from 'ant-design-vue';
 
 import {
+  getApplicationHomePath,
   getMyMenuUsage,
   getNavigationApplications,
   selectApplication,
@@ -59,34 +60,6 @@ function readTabState(applicationKey: string) {
     sessionStorage.removeItem(tabStateKey(applicationKey));
     return null;
   }
-}
-
-function firstMenuPath(application: NavigationApplication) {
-  const menus = application.menus ?? [];
-  const roots = menus
-    .filter((menu) => !menu.parent_id)
-    .toSorted((left, right) => left.sort_order - right.sort_order);
-  const findPage = (
-    menuId: string,
-    parentPath = `/app/${application.key}`,
-  ): null | string => {
-    const menu = menus.find((item) => item.id === menuId);
-    if (!menu) return null;
-    const segment =
-      String(menu.route_path ?? menu.key)
-        .split('/')
-        .findLast(Boolean) ?? menu.key;
-    const path = `${parentPath}/${segment}`;
-    if (menu.component) return path;
-    for (const child of menus
-      .filter((item) => item.parent_id === menuId)
-      .toSorted((left, right) => left.sort_order - right.sort_order)) {
-      const childPath = findPage(child.id, path);
-      if (childPath) return childPath;
-    }
-    return null;
-  };
-  return roots.map((item) => findPage(item.id)).find(Boolean) ?? '/apps';
 }
 
 function menuPath(application: NavigationApplication, menuId: string) {
@@ -155,7 +128,9 @@ async function openApplication(
   accessStore.setAccessMenus([]);
   accessStore.setAccessRoutes([]);
   accessStore.setIsAccessChecked(false);
-  await router.replace(targetPath || lastPath || firstMenuPath(application));
+  await router.replace(
+    targetPath || lastPath || getApplicationHomePath(application),
+  );
 }
 
 const availableApplications = computed(() =>

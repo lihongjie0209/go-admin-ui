@@ -25,6 +25,7 @@ export interface NavigationMenu {
 export interface NavigationApplication {
   default_menu_id?: null | string;
   description?: null | string;
+  home_path?: null | string;
   icon: null | string;
   id: string;
   key: string;
@@ -108,15 +109,21 @@ export async function getNavigationApplications() {
     '/me/applications',
     {},
   );
-  const value = applications.map((application) => ({
-    description: '',
-    icon: application.icon || null,
-    id: application.id,
-    key: application.code,
-    menus: [],
-    name: application.name,
-    type: 'organization' as const,
-  }));
+  const value = applications
+    .toSorted(
+      (left, right) =>
+        left.sort_order - right.sort_order || left.id.localeCompare(right.id),
+    )
+    .map((application) => ({
+      description: '',
+      home_path: application.home_path || null,
+      icon: application.icon || null,
+      id: application.id,
+      key: application.code,
+      menus: [],
+      name: application.name,
+      type: 'organization' as const,
+    }));
   navigationCache.set(scope, { expiresAt: Date.now() + 60_000, value });
   return value;
 }
@@ -196,20 +203,26 @@ export function getApplicationHomePath(application: NavigationApplication) {
   const findPage = (
     items: RouteRecordStringComponent[],
     preferredMenuId?: null | string,
+    preferredPath?: string,
   ): string | undefined => {
     for (const item of items) {
       if (
         item.component &&
-        (!preferredMenuId || item.meta?.menuId === preferredMenuId)
+        (!preferredMenuId || item.meta?.menuId === preferredMenuId) &&
+        (!preferredPath || item.path === preferredPath)
       ) {
         return item.path;
       }
       const childPath = item.children
-        ? findPage(item.children, preferredMenuId)
+        ? findPage(item.children, preferredMenuId, preferredPath)
         : undefined;
       if (childPath) return childPath;
     }
   };
+  const configuredHomePath = String(application.home_path ?? '').trim();
+  if (configuredHomePath && findPage(routes, undefined, configuredHomePath)) {
+    return configuredHomePath;
+  }
   return (
     (application.default_menu_id
       ? findPage(routes, application.default_menu_id)

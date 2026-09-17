@@ -8,6 +8,7 @@ const api = vi.hoisted(() => ({
   navigation: vi.fn(),
   usage: vi.fn(),
   select: vi.fn(),
+  homePath: vi.fn(),
   organization: vi.fn(),
   replace: vi.fn(),
   resetRoutes: vi.fn(),
@@ -32,6 +33,7 @@ vi.mock('@vben/stores', () => ({
 vi.mock('#/api/core/menu', () => ({
   getNavigationApplications: api.navigation,
   getMyMenuUsage: api.usage,
+  getApplicationHomePath: api.homePath,
   selectApplication: api.select,
 }));
 vi.mock('#/router', () => ({
@@ -125,6 +127,7 @@ beforeEach(() => {
     'navigation',
     'usage',
     'select',
+    'homePath',
     'organization',
     'replace',
     'resetRoutes',
@@ -155,6 +158,9 @@ beforeEach(() => {
   ]);
   api.organization.mockResolvedValue({ id: 'org-a' });
   api.select.mockResolvedValue(undefined);
+  api.homePath.mockImplementation(
+    (item) => `/app/${item.key}${item.menus[0]?.route_path ?? ''}`,
+  );
   api.replace.mockResolvedValue(undefined);
   sessionStorage.clear();
 });
