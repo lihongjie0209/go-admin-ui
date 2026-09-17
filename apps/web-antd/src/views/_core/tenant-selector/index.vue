@@ -144,7 +144,9 @@ onScopeDispose(() => controller.abort());
                 <strong class="truncate text-sm">{{
                   tenant.tenant_name
                 }}</strong>
-                <Tag v-if="tenant.tenant_id === currentTenantID" color="blue">当前</Tag>
+                <Tag v-if="tenant.tenant_id === currentTenantID" color="blue"
+                  >当前</Tag
+                >
                 <Tag v-if="tenant.is_administrator" color="gold">管理员</Tag>
               </span>
               <span class="mt-2 block truncate text-xs text-muted-foreground">

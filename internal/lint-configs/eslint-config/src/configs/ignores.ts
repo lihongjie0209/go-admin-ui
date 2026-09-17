@@ -32,6 +32,8 @@ export async function ignores(): Promise<Linter.Config[]> {
         '**/.cache',
         '**/.output',
         '**/.vite-inspect',
+        '**/public/file-viewer/**',
+        '**/dummy-non-existing-folder/file-viewer/**',
 
         '**/CHANGELOG*.md',
         '**/*.min.*',

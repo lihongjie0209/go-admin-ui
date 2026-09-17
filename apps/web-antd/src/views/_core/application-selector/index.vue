@@ -281,7 +281,8 @@ onMounted(async () => {
                     </div>
                     <span
                       class="text-muted-foreground transition-transform group-hover:translate-x-0.5"
-                      >→</span>
+                      >→</span
+                    >
                   </div>
                   <div class="mt-1 flex items-center gap-1">
                     <Tag
@@ -329,7 +330,8 @@ onMounted(async () => {
                   <span
                     v-if="!frequentMenus(application).length"
                     class="text-xs text-muted-foreground"
-                    >暂无可用菜单</span>
+                    >暂无可用菜单</span
+                  >
                 </div>
               </div>
             </div>

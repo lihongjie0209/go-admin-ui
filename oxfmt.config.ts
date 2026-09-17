@@ -19,6 +19,7 @@ export default defineConfig({
     '**/*.svg',
     '**/*.sh',
     'public',
+    '**/dummy-non-existing-folder/file-viewer',
     '.npmrc',
     '*-lock.yaml',
     'skills-lock.json',

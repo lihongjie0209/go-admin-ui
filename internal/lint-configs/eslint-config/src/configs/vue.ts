@@ -85,7 +85,9 @@ export async function vue(): Promise<Linter.Config[]> {
         'vue/dot-location': ['error', 'property'],
         'vue/dot-notation': ['error', { allowKeywords: true }],
         'vue/eqeqeq': ['error', 'smart'],
-        'vue/html-closing-bracket-newline': 'error',
+        // Oxfmt owns template line wrapping; enforcing a second layout rule
+        // makes valid formatter output fail lint for long component tags.
+        'vue/html-closing-bracket-newline': 'off',
         'vue/html-indent': 'off',
         // 'vue/html-indent': ['error', 2],
         'vue/html-quotes': ['error', 'double'],

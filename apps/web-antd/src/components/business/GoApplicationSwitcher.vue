@@ -241,8 +241,11 @@ onBeforeUnmount(() => {
                 :color="application.type === 'platform' ? 'blue' : 'green'"
                 >{{
                   application.type === 'platform' ? '平台级' : '组织级'
-                }}</Tag>
-              <Tag v-if="application.key === currentApplicationKey" color="blue">当前</Tag>
+                }}</Tag
+              >
+              <Tag v-if="application.key === currentApplicationKey" color="blue"
+                >当前</Tag
+              >
             </span>
             <span class="mt-1 block truncate text-xs text-muted-foreground">{{
               application.description

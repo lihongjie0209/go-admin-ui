@@ -1,5 +1,6 @@
 dist
 public
+**/dummy-non-existing-folder/file-viewer
 __tests__
 coverage
 .codex

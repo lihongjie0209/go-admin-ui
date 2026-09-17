@@ -244,7 +244,9 @@ defineExpose({
           </Button>
         </template>
       </Space>
-      <span v-if="selectedRows.length" class="text-sm text-muted-foreground">已选择 {{ selectedRows.length }} 项</span>
+      <span v-if="selectedRows.length" class="text-sm text-muted-foreground"
+        >已选择 {{ selectedRows.length }} 项</span
+      >
     </div>
 
     <Alert v-if="loadError" message="数据加载失败" show-icon type="error">
