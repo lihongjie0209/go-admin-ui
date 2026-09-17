@@ -40,6 +40,17 @@ vi.mock('#/router', () => ({
   resetRoutes: api.resetRoutes,
   router: { replace: api.replace },
 }));
+vi.mock('#/composables/use-page-capabilities', async () => {
+  const { ref } = await import('vue');
+  return {
+    usePageCapability: () => ({
+      allowed: ref(true),
+      error: ref(undefined),
+      loading: ref(false),
+      refresh: vi.fn(),
+    }),
+  };
+});
 vi.mock('ant-design-vue', async () => {
   const { defineComponent, h } = await import('vue');
   const box = defineComponent({
@@ -58,7 +69,24 @@ vi.mock('ant-design-vue', async () => {
       }),
   });
   search.Search = search;
+  const alert = defineComponent({
+    props: ['description', 'message'],
+    setup: (p, c) => () =>
+      h('div', [p.message, p.description, c.slots.action?.()]),
+  });
+  const button = defineComponent({
+    inheritAttrs: false,
+    props: ['disabled', 'loading'],
+    setup: (p, c) => () =>
+      h(
+        'button',
+        { ...c.attrs, disabled: p.disabled || p.loading },
+        c.slots.default?.(),
+      ),
+  });
   return {
+    Alert: alert,
+    Button: button,
     Empty: box,
     Input: search,
     Modal: box,
@@ -279,7 +307,6 @@ it('关闭或缓存页停用后旧列表响应不能写入，再打开重新加�
 it('应用列表加载失败清空旧结果并展示中文错误', async () => {
   api.navigation.mockRejectedValueOnce(new Error('导航服务不可用'));
   await mount();
-  expect(api.error).toHaveBeenCalledWith('导航服务不可用');
-  expect(root.querySelectorAll('button')).toHaveLength(0);
+  expect(root.textContent).toContain('导航服务不可用');
   expect(root.textContent).not.toContain('工作流中心');
 });
