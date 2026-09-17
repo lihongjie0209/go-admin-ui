@@ -1,3 +1,4 @@
+export * from './api-error';
 export * from './capability';
 export * from './contracts';
 export * from './dictionary';

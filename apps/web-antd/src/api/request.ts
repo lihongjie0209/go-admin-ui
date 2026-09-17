@@ -18,6 +18,7 @@ import { message } from 'ant-design-vue';
 import { useAuthStore } from '#/store';
 
 import { refreshTokenApi } from './core';
+import { normalizeApiError } from './go/api-error';
 import { API_CODE_OK } from './go/contracts';
 import { restorePersistedTenantContext } from './go/tenant-context-storage';
 import { applyRequestContentType } from './request-content-type';
@@ -124,6 +125,10 @@ function createRequestClient(
       message.error(`${errorMessage || msg}${requestID}`);
     }),
   );
+
+  client.addResponseInterceptor({
+    rejected: (error) => Promise.reject(normalizeApiError(error)),
+  });
 
   return client;
 }
