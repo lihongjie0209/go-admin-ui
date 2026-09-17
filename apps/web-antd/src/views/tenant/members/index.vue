@@ -3,9 +3,12 @@ import { ref } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
-import { requestClient } from '#/api/request';
 import GoSelectionDrawer from '#/components/business/GoSelectionDrawer.vue';
 import EffectivePermissionDrawer from '#/components/business/tenant/EffectivePermissionDrawer.vue';
+import {
+  loadMemberRoleAssignment,
+  saveMemberRoleAssignment,
+} from '#/modules/tenant/member-role-assignment';
 import { tenantMemberPageContract } from '#/modules/tenant/resource-contracts';
 import FlatResourcePage from '#/templates/resource/FlatResourcePage.vue';
 
@@ -60,38 +63,20 @@ const contract = {
   },
 };
 
-async function loadRoleAssignment() {
+async function loadRoleAssignment(signal?: AbortSignal) {
   if (!member.value) return { items: [], selected: [] };
-  const [rolePage, assigned] = await Promise.all([
-    requestClient.post<{
-      items: Array<{ code: string; id: string; name: string }>;
-    }>('/tenant-roles/page', {
-      keyword: '',
-      page: 1,
-      page_size: 200,
-      statuses: ['active'],
-    }),
-    requestClient.post<Array<{ id: string }>>('/tenant-members/roles/get', {
-      membership_id: String(member.value.id),
-    }),
-  ]);
-  return {
-    items: rolePage.items.map((role) => ({
-      description: role.code,
-      id: role.id,
-      name: role.name,
-    })),
-    selected: assigned.map((role) => role.id),
-  };
+  return loadMemberRoleAssignment(String(member.value.id), signal);
 }
 
 async function saveRoleAssignment(roleIDs: string[]) {
   if (!member.value) return;
-  await requestClient.post('/tenant-members/roles/set', {
-    membership_id: String(member.value.id),
-    role_ids: roleIDs,
-    version: Number(member.value.version),
-  });
+  await saveMemberRoleAssignment(
+    {
+      id: String(member.value.id),
+      version: Number(member.value.version),
+    },
+    roleIDs,
+  );
 }
 
 function assignmentSaved() {

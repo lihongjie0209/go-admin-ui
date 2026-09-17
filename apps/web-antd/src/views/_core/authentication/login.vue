@@ -17,6 +17,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: 'VbenInput',
       componentProps: {
+        'aria-label': '用户名',
         placeholder: '请输入用户名',
       },
       fieldName: 'username',
@@ -26,6 +27,7 @@ const formSchema = computed((): VbenFormSchema[] => {
     {
       component: 'VbenInputPassword',
       componentProps: {
+        'aria-label': '密码',
         placeholder: $t('authentication.password'),
       },
       fieldName: 'password',
