@@ -249,6 +249,9 @@ catalogs:
     defu:
       specifier: ^6.1.7
       version: 6.1.7
+    dompurify:
+      specifier: 3.4.14
+      version: 3.4.14
     dotenv:
       specifier: ^17.4.2
       version: 17.4.2
@@ -715,6 +718,9 @@ importers:
       dayjs:
         specifier: 'catalog:'
         version: 1.11.23
+      dompurify:
+        specifier: 'catalog:'
+        version: 3.4.14
       echarts:
         specifier: 'catalog:'
         version: 6.1.0

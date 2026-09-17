@@ -49,6 +49,7 @@
     "ant-design-vue": "catalog:",
     "codemirror": "catalog:",
     "dayjs": "catalog:",
+    "dompurify": "catalog:",
     "echarts": "catalog:",
     "highlight.js": "catalog:",
     "pinia": "catalog:",

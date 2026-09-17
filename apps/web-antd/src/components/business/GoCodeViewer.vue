@@ -11,6 +11,8 @@ import plaintext from 'highlight.js/lib/languages/plaintext';
 import sql from 'highlight.js/lib/languages/sql';
 import xml from 'highlight.js/lib/languages/xml';
 
+import { sanitizeHighlightedCode } from './code-highlight';
+
 const props = withDefaults(
   defineProps<{
     code?: unknown;
@@ -58,8 +60,10 @@ const text = computed(() => {
   return JSON.stringify(props.code ?? null, null, 2);
 });
 const lines = computed(() => text.value.split('\n'));
-const highlighted = computed(
-  () => hljs.highlight(text.value, { language: props.language }).value,
+const highlighted = computed(() =>
+  sanitizeHighlightedCode(
+    hljs.highlight(text.value, { language: props.language }).value,
+  ),
 );
 watch(text, resetCopy);
 async function copy() {
@@ -107,6 +111,8 @@ async function copy() {
       <ol v-if="showLineNumbers" class="go-code-lines" aria-hidden="true">
         <li v-for="(_, index) in lines" :key="index">{{ index + 1 }}</li>
       </ol>
+      <!-- Highlight.js output is constrained by the DOMPurify token allowlist. -->
+      <!-- eslint-disable-next-line vue/no-v-html -->
       <pre><code :class="`language-${language}`" v-html="highlighted"></code></pre>
     </div>
   </section>

@@ -12,6 +12,9 @@ vi.mock('@vben/icons', () => ({
   Check: { render: () => h('i', 'copied') },
   Copy: { render: () => h('i', 'copy') },
 }));
+vi.mock('../../src/components/business/code-highlight', () => ({
+  sanitizeHighlightedCode: (markup) => markup,
+}));
 vi.mock('ant-design-vue', () => ({
   message: api,
   Tooltip: { setup: (_, c) => () => h('div', c.slots.default?.()) },
