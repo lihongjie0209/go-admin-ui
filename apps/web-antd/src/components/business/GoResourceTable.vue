@@ -63,6 +63,13 @@ const authorizedRowActions = props.rowActions.map((action) => ({
 const visibleRowActions = computed(() =>
   authorizedRowActions.map(({ action, capability }) => ({
     ...action,
+    run: (row: Record<string, unknown>) =>
+      runFrontendAction(
+        action.authorization?.key ??
+          `${props.authorizationResource}:${action.key}`,
+        String(row.id ?? ''),
+        () => action.run(row),
+      ),
     visible: (row: Record<string, unknown>) =>
       (capability?.allowed.value ?? true) && (action.visible?.(row) ?? true),
   })),

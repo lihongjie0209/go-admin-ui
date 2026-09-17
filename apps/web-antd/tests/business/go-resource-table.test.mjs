@@ -12,6 +12,8 @@ const state = vi.hoisted(() => ({
   delete: vi.fn(),
   evaluate: vi.fn(),
   page: vi.fn(),
+  rowAction: vi.fn(),
+  track: vi.fn(),
   update: vi.fn(),
 }));
 
@@ -24,6 +26,7 @@ vi.mock('../../src/api/go', async (loadOriginal) => ({
     update: state.update,
   }),
   evaluateCapabilities: state.evaluate,
+  trackFrontendAction: state.track,
 }));
 
 vi.mock('../../src/components/business/GoDataGrid.vue', () => ({
@@ -35,6 +38,7 @@ vi.mock('../../src/components/business/GoDataGrid.vue', () => ({
       'dataProvider',
       'enabled',
       'remove',
+      'rowActions',
     ],
     setup(props) {
       state.childProps = props;
@@ -61,6 +65,15 @@ vi.mock('../../src/components/business/GoDataGrid.vue', () => ({
               onClick: () => props.remove({ id: 'row-1', version: 7 }),
             },
             'delete',
+          ),
+          h(
+            'button',
+            {
+              'data-row-action': true,
+              onClick: () =>
+                props.rowActions[0].run({ id: 'row-1', version: 7 }),
+            },
+            'row action',
           ),
         ]);
     },
@@ -104,6 +117,18 @@ async function mount() {
                 page: '/tenant/members/page',
                 update: '/tenant/members/update',
               },
+              rowActions: [
+                {
+                  authorization: {
+                    action: 'assign-role',
+                    key: 'tenant.member:assign-role',
+                    resource: 'tenant.member',
+                  },
+                  key: 'assign-role',
+                  label: '分配角色',
+                  run: state.rowAction,
+                },
+              ],
               ref: (value) => (resourceTable = value),
             }),
         },
@@ -119,6 +144,8 @@ beforeEach(() => {
     state.delete,
     state.evaluate,
     state.page,
+    state.rowAction,
+    state.track,
     state.update,
   ])
     mock.mockReset();
@@ -133,6 +160,8 @@ beforeEach(() => {
   state.create.mockResolvedValue({});
   state.update.mockResolvedValue({});
   state.delete.mockResolvedValue(undefined);
+  state.rowAction.mockResolvedValue(undefined);
+  state.track.mockImplementation(async (_event, operation) => operation());
 });
 
 afterEach(() => {
@@ -176,6 +205,24 @@ describe('go resource table integration', () => {
       { id: 'row-1', version: 7 },
     );
     expect(state.delete).toHaveBeenCalledWith({ id: 'row-1', version: 7 });
+  });
+
+  it('tracks custom row actions with their authorization identity and row ID', async () => {
+    await mount();
+
+    root.querySelector('[data-row-action]').click();
+    await flush();
+
+    expect(state.rowAction).toHaveBeenCalledWith({ id: 'row-1', version: 7 });
+    expect(state.track).toHaveBeenCalledWith(
+      {
+        application_id: '',
+        event_name: 'tenant.member:assign-role',
+        page_route: '',
+        resource_id: 'row-1',
+      },
+      expect.any(Function),
+    );
   });
 
   it('merges external filters with immutable filters and ignores a late page response', async () => {
