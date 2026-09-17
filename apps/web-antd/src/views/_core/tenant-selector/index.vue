@@ -15,6 +15,7 @@ import {
   getPersistedTenantContext,
   switchTenantContext,
 } from '#/api/go';
+import { errorMessage } from '#/components/foundation/error-presentation';
 import { resetRoutes } from '#/router';
 import { clearPrincipalScopedState } from '#/security/principal-state';
 
@@ -109,7 +110,12 @@ onScopeDispose(() => controller.abort());
           v-if="loadError"
           class="flex min-h-52 flex-col items-center justify-center gap-3"
         >
-          <p class="m-0 text-sm text-destructive">租户列表加载失败</p>
+          <p class="m-0 text-sm font-medium text-destructive">
+            租户列表加载失败
+          </p>
+          <p class="m-0 max-w-xl text-center text-xs text-muted-foreground">
+            {{ errorMessage(loadError, '租户列表加载失败') }}
+          </p>
           <Button @click="load">重新加载</Button>
         </div>
         <div

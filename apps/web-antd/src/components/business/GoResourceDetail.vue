@@ -17,6 +17,7 @@ import {
 } from 'ant-design-vue';
 
 import { createResourceApi } from '#/api/go';
+import { errorMessage } from '#/components/foundation/error-presentation';
 import GoAuditSummary from '#/components/foundation/GoAuditSummary.vue';
 import GoDateTimeText from '#/components/foundation/GoDateTimeText.vue';
 import GoDictionaryText from '#/components/foundation/GoDictionaryText.vue';
@@ -115,7 +116,13 @@ defineExpose({ load, record });
       show-icon
       type="warning"
     />
-    <Alert v-else-if="loadError" message="详情加载失败" show-icon type="error">
+    <Alert
+      v-else-if="loadError"
+      :description="errorMessage(loadError, '详情加载失败')"
+      message="详情加载失败"
+      show-icon
+      type="error"
+    >
       <template #action>
         <Button size="small" @click="load">重试</Button>
       </template>

@@ -17,6 +17,7 @@ import {
   Tag,
 } from 'ant-design-vue';
 
+import { errorMessage } from '#/components/foundation/error-presentation';
 import GoDateTimeText from '#/components/foundation/GoDateTimeText.vue';
 import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
@@ -180,7 +181,13 @@ onScopeDispose(() => {
         show-icon
         type="warning"
       />
-      <Alert v-if="loadError" message="成员数据加载失败" show-icon type="error">
+      <Alert
+        v-if="loadError"
+        :description="errorMessage(loadError, '成员数据加载失败')"
+        message="成员数据加载失败"
+        show-icon
+        type="error"
+      >
         <template #action>
           <Button size="small" @click="load">重试</Button>
         </template>

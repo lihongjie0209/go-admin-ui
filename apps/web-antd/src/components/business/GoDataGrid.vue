@@ -18,6 +18,7 @@ import {
   Table,
 } from 'ant-design-vue';
 
+import { errorMessage } from '#/components/foundation/error-presentation';
 import GoDateTimeText from '#/components/foundation/GoDateTimeText.vue';
 import GoEntityReference from '#/components/foundation/GoEntityReference.vue';
 import GoPagination from '#/components/foundation/GoPagination.vue';
@@ -249,7 +250,13 @@ defineExpose({
       >
     </div>
 
-    <Alert v-if="loadError" message="数据加载失败" show-icon type="error">
+    <Alert
+      v-if="loadError"
+      :description="errorMessage(loadError, '数据加载失败')"
+      message="数据加载失败"
+      show-icon
+      type="error"
+    >
       <template #action>
         <Button size="small" @click="load()">重试</Button>
       </template>

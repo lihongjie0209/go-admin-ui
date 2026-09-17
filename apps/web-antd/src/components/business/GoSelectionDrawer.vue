@@ -11,6 +11,7 @@ import {
   Transfer,
 } from 'ant-design-vue';
 
+import { errorMessage } from '#/components/foundation/error-presentation';
 import { useFrontendAction } from '#/composables/use-frontend-action';
 
 export interface SelectionItem {
@@ -126,7 +127,13 @@ onScopeDispose(() => {
     :width="720"
     @close="emit('update:open', false)"
   >
-    <Alert v-if="loadError" message="可选项加载失败" show-icon type="error">
+    <Alert
+      v-if="loadError"
+      :description="errorMessage(loadError, '可选项加载失败')"
+      message="可选项加载失败"
+      show-icon
+      type="error"
+    >
       <template #action>
         <Button size="small" @click="reloadOptions">重试</Button>
       </template>

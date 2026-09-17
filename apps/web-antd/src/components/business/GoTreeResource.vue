@@ -24,6 +24,7 @@ import {
 } from 'ant-design-vue';
 
 import { createTreeResourceApi } from '#/api/go/tree-resource';
+import { errorMessage } from '#/components/foundation/error-presentation';
 import {
   canMoveTreeNode,
   filterTreeWithAncestors,
@@ -301,7 +302,13 @@ defineExpose({ createNode, deleteNode, load, updateNode });
         :selected="selected"
       ></slot>
     </Space>
-    <Alert v-if="loadError" message="树数据加载失败" show-icon type="error">
+    <Alert
+      v-if="loadError"
+      :description="errorMessage(loadError, '树数据加载失败')"
+      message="树数据加载失败"
+      show-icon
+      type="error"
+    >
       <template #action>
         <Button size="small" @click="load">重试</Button>
       </template>
