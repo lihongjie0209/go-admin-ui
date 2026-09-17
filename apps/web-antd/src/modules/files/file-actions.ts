@@ -6,12 +6,13 @@ export interface FileDownload {
   url: string;
 }
 
-export async function uploadFile(file: File) {
+export async function uploadFile(file: File, signal?: AbortSignal) {
   const body = new FormData();
   body.append('file', file, file.name);
   return await requestClient.post<Record<string, unknown>>(
     '/files/upload',
     body,
+    { signal },
   );
 }
 

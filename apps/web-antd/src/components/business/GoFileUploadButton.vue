@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CapabilityRequest } from '#/api/go';
 
-import { ref } from 'vue';
+import { onScopeDispose, ref } from 'vue';
 
 import { Button, message } from 'ant-design-vue';
 
@@ -29,23 +29,44 @@ const emit = defineEmits<{
 const capability = usePageCapability(props.authorization);
 const input = ref<HTMLInputElement>();
 const uploading = ref(false);
+let uploadController: AbortController | undefined;
+let uploadGeneration = 0;
+
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === 'AbortError';
+}
 
 async function selected(event: Event) {
   const target = event.target as HTMLInputElement;
   const file = target.files?.[0];
   target.value = '';
   if (!file || uploading.value || !capability.allowed.value) return;
+  const generation = ++uploadGeneration;
+  const controller = new AbortController();
+  uploadController = controller;
   uploading.value = true;
   try {
-    const record = await uploadFile(file);
+    const record = await uploadFile(file, controller.signal);
+    if (generation !== uploadGeneration || controller.signal.aborted) return;
     message.success('文件上传成功');
     emit('uploaded', record);
   } catch (error) {
-    message.error(error instanceof Error ? error.message : '文件上传失败');
+    if (generation === uploadGeneration && !isAbortError(error)) {
+      message.error(error instanceof Error ? error.message : '文件上传失败');
+    }
   } finally {
-    uploading.value = false;
+    if (generation === uploadGeneration) {
+      uploading.value = false;
+      uploadController = undefined;
+    }
   }
 }
+
+onScopeDispose(() => {
+  uploadGeneration++;
+  uploadController?.abort();
+  uploadController = undefined;
+});
 </script>
 
 <template>

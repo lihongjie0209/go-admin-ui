@@ -21,13 +21,24 @@ describe('file management actions', () => {
 
     await expect(uploadFile(file)).resolves.toEqual(record);
     expect(api.post).toHaveBeenCalledTimes(1);
-    const [path, body] = api.post.mock.calls[0];
+    const [path, body, options] = api.post.mock.calls[0];
     expect(path).toBe('/files/upload');
     expect(body).toBeInstanceOf(FormData);
     const uploaded = body.get('file');
     expect(uploaded).toBeInstanceOf(File);
     expect(uploaded.name).toBe('report.txt');
     await expect(uploaded.text()).resolves.toBe('hello');
+    expect(options).toEqual({ signal: undefined });
+  });
+
+  it('passes upload cancellation through to the request client', async () => {
+    const controller = new AbortController();
+    const file = new File(['hello'], 'report.txt', { type: 'text/plain' });
+    api.post.mockResolvedValueOnce({ id: 'file-1' });
+
+    await uploadFile(file, controller.signal);
+
+    expect(api.post.mock.calls[0][2]).toEqual({ signal: controller.signal });
   });
 
   it('requests a short-lived download without persisting the signed URL', async () => {
