@@ -92,6 +92,26 @@ function queueRefresh() {
 }
 
 function register(request: CapabilityRequest) {
+  const declared = props.capabilities.find((item) => item.key === request.key);
+  if (declared) {
+    if (
+      declared.resource === request.resource &&
+      declared.action === request.action
+    ) {
+      return () => {};
+    }
+    registrationConflicts.set(
+      request.key,
+      (registrationConflicts.get(request.key) ?? 0) + 1,
+    );
+    queueRefresh();
+    return () => {
+      const count = registrationConflicts.get(request.key) ?? 0;
+      if (count <= 1) registrationConflicts.delete(request.key);
+      else registrationConflicts.set(request.key, count - 1);
+      queueRefresh();
+    };
+  }
   const current = dynamic.get(request.key);
   if (
     current &&

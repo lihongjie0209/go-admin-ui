@@ -49,6 +49,8 @@ const loadProfile = vi.mocked(getSelfProfile);
 describe('profilePage', () => {
   beforeEach(() => {
     push.mockReset();
+    loadProfile.mockReset();
+    evaluate.mockReset();
     loadProfile.mockResolvedValue({
       created_at: '2026-09-18T08:00:00+08:00',
       created_by: 'system',
@@ -67,6 +69,7 @@ describe('profilePage', () => {
     evaluate.mockResolvedValue({
       expires_at: '2026-09-18T10:00:00+08:00',
       items: [
+        { allowed: true, key: 'identity.profile:read' },
         { allowed: true, key: 'identity.profile:update' },
         { allowed: true, key: 'identity.credential:change-password' },
         { allowed: false, key: 'identity.session:list' },
@@ -103,5 +106,22 @@ describe('profilePage', () => {
     if (!changePasswordButton) throw new Error('修改密码入口未渲染');
     await changePasswordButton.trigger('click');
     expect(push).toHaveBeenCalledWith('/auth/change-password');
+  });
+
+  it('does not load profile data before read permission is granted', async () => {
+    evaluate.mockResolvedValue({
+      expires_at: '2026-09-18T10:00:00+08:00',
+      items: [
+        { allowed: false, key: 'identity.profile:read' },
+        { allowed: true, key: 'identity.profile:update' },
+      ],
+      revision: '2',
+    });
+
+    const wrapper = mount(ProfilePage);
+    await flushPromises();
+
+    expect(loadProfile).not.toHaveBeenCalled();
+    expect(wrapper.text()).not.toContain('用户名');
   });
 });

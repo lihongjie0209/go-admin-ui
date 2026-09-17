@@ -115,4 +115,65 @@ describe('goCapabilityProvider', () => {
       outputs.some((item) => item.attributes('data-error') === 'true'),
     ).toBe(true);
   });
+
+  it('reuses matching static declarations without reevaluating on consumer mount', async () => {
+    evaluate.mockResolvedValue({
+      expires_at: '2026-09-18T10:00:00+08:00',
+      items: [{ allowed: true, key: 'identity.profile:read' }],
+      revision: '8',
+    });
+    const Consumer = capabilityConsumer(
+      'identity.profile:read',
+      'identity.profile',
+      'read',
+    );
+
+    const wrapper = mount(GoCapabilityProvider, {
+      props: {
+        capabilities: [
+          {
+            action: 'read',
+            key: 'identity.profile:read',
+            resource: 'identity.profile',
+          },
+        ],
+      },
+      slots: { default: () => h(Consumer) },
+    });
+    await flushPromises();
+
+    expect(wrapper.get('output').attributes('data-allowed')).toBe('true');
+    expect(evaluate).toHaveBeenCalledTimes(1);
+  });
+
+  it('fails closed when a consumer conflicts with a static declaration', async () => {
+    evaluate.mockResolvedValue({
+      expires_at: '2026-09-18T10:00:00+08:00',
+      items: [],
+      revision: '8',
+    });
+    const Consumer = capabilityConsumer(
+      'identity.profile:read',
+      'identity.user',
+      'read',
+    );
+
+    const wrapper = mount(GoCapabilityProvider, {
+      props: {
+        capabilities: [
+          {
+            action: 'read',
+            key: 'identity.profile:read',
+            resource: 'identity.profile',
+          },
+        ],
+      },
+      slots: { default: () => h(Consumer) },
+    });
+    await flushPromises();
+
+    const output = wrapper.get('output');
+    expect(output.attributes('data-allowed')).toBe('false');
+    expect(output.attributes('data-error')).toBe('true');
+  });
 });
