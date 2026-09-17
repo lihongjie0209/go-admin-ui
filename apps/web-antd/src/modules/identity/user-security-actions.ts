@@ -27,6 +27,16 @@ export async function resetUserPassword(userID: string, password: string) {
   });
 }
 
+export async function changeOwnPassword(
+  oldPassword: string,
+  newPassword: string,
+) {
+  await requestClient.post('/auth/password/change', {
+    new_password: newPassword,
+    old_password: oldPassword,
+  });
+}
+
 export async function forceLogoutUser(row: Record<string, unknown>) {
   await requestClient.post('/auth/sessions/force-logout-all', {
     user_id: String(row.id ?? ''),

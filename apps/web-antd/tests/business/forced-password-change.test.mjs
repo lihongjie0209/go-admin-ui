@@ -11,6 +11,11 @@ const api = vi.hoisted(() => ({
   success: vi.fn(),
   error: vi.fn(),
   warning: vi.fn(),
+  track: vi.fn(),
+}));
+vi.mock('../../src/api/go', async (loadOriginal) => ({
+  ...(await loadOriginal()),
+  trackFrontendAction: api.track,
 }));
 vi.mock('#/api/request', () => ({ requestClient: { post: api.invoke } }));
 vi.mock('#/store', () => ({ useAuthStore: () => ({ logout: api.logout }) }));
@@ -71,6 +76,7 @@ async function submit() {
 beforeEach(() => {
   for (const mock of Object.values(api)) mock.mockReset();
   api.invoke.mockResolvedValue({});
+  api.track.mockImplementation(async (_event, operation) => operation());
   api.logout.mockResolvedValue();
   root = document.createElement('div');
   document.body.append(root);
@@ -112,6 +118,15 @@ it('确认后通过受控接口修改密码，成功才退出且防止重复提�
     new_password: 'LongPassword1!',
     old_password: 'TemporaryPassword1!',
   });
+  expect(api.track).toHaveBeenCalledWith(
+    {
+      application_id: '',
+      event_name: 'identity.credential:change-password',
+      page_route: '',
+      resource_id: '',
+    },
+    expect.any(Function),
+  );
   expect(root.querySelector('button').disabled).toBe(true);
   expect(api.logout).not.toHaveBeenCalled();
   pending.resolve({});

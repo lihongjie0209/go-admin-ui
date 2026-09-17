@@ -24,6 +24,7 @@ import {
 import GoAccess from '#/components/foundation/GoAccess.vue';
 import GoCapabilityProvider from '#/components/foundation/GoCapabilityProvider.vue';
 import GoDateTimeText from '#/components/foundation/GoDateTimeText.vue';
+import { useFrontendAction } from '#/composables/use-frontend-action';
 import {
   getSelfProfile,
   updateSelfProfile,
@@ -32,6 +33,7 @@ import {
 
 const router = useRouter();
 const userStore = useUserStore();
+const runFrontendAction = useFrontendAction();
 const loading = ref(true);
 const saving = ref(false);
 const failure = ref('');
@@ -82,12 +84,17 @@ async function save() {
   saving.value = true;
   failure.value = '';
   try {
-    const updated = await updateSelfProfile({
-      display_name: form.display_name.trim(),
-      email: form.email.trim().toLocaleLowerCase('en-US'),
-      phone: form.phone.trim(),
-      version: form.version,
-    });
+    const updated = await runFrontendAction(
+      'identity.profile:update',
+      profile.value?.id ?? '',
+      () =>
+        updateSelfProfile({
+          display_name: form.display_name.trim(),
+          email: form.email.trim().toLocaleLowerCase('en-US'),
+          phone: form.phone.trim(),
+          version: form.version,
+        }),
+    );
     applyProfile(updated);
     if (userStore.userInfo) {
       userStore.setUserInfo({

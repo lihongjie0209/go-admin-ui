@@ -4,8 +4,12 @@ const api = vi.hoisted(() => ({ post: vi.fn() }));
 
 vi.mock('#/api/request', () => ({ requestClient: api }));
 
-const { forceLogoutUser, resetUserPassword, validateResetPassword } =
-  await import('../../src/modules/identity/user-security-actions.ts');
+const {
+  changeOwnPassword,
+  forceLogoutUser,
+  resetUserPassword,
+  validateResetPassword,
+} = await import('../../src/modules/identity/user-security-actions.ts');
 
 beforeEach(() => {
   api.post.mockReset();
@@ -39,6 +43,15 @@ describe('user security actions', () => {
     await forceLogoutUser({ id: 'user-1', username: 'alice' });
     expect(api.post).toHaveBeenCalledWith('/auth/sessions/force-logout-all', {
       user_id: 'user-1',
+    });
+  });
+
+  it('changes only the authenticated user password without accepting a user ID', async () => {
+    api.post.mockResolvedValue({});
+    await changeOwnPassword('current-password', 'new-password');
+    expect(api.post).toHaveBeenCalledWith('/auth/password/change', {
+      new_password: 'new-password',
+      old_password: 'current-password',
     });
   });
 });
