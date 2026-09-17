@@ -1070,7 +1070,7 @@
     {
       "rendererId": "model",
       "id": "model-occt-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/model/occt-worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/model/occt-worker.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1079,7 +1079,7 @@
     {
       "rendererId": "model",
       "id": "model-occt-runtime",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/model/occt-import-js.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/model/occt-import-js.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1088,7 +1088,7 @@
     {
       "rendererId": "model",
       "id": "model-occt-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/model/occt-import-js.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/model/occt-import-js.wasm",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1097,7 +1097,7 @@
     {
       "rendererId": "model",
       "id": "model-occt-license",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/model/LICENSE.occt.txt",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/model/LICENSE.occt.txt",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1106,7 +1106,7 @@
     {
       "rendererId": "model",
       "id": "model-occt-import-license",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/model/LICENSE.occt-import-js.txt",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/model/LICENSE.occt-import-js.txt",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1115,7 +1115,7 @@
     {
       "rendererId": "drawing",
       "id": "drawio-viewer-script",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/drawio/viewer-static.min.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/drawio/viewer-static.min.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1124,7 +1124,7 @@
     {
       "rendererId": "drawing",
       "id": "drawio-offline-assets",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/drawio",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/drawio",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1133,7 +1133,7 @@
     {
       "rendererId": "pdf",
       "id": "pdf-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/pdf/pdf.worker.mjs",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/pdf/pdf.worker.mjs",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1142,7 +1142,7 @@
     {
       "rendererId": "pdf",
       "id": "pdf-cmaps",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/pdf/cmaps",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/pdf/cmaps",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1151,7 +1151,7 @@
     {
       "rendererId": "pdf",
       "id": "pdf-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/pdf/wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/pdf/wasm",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1160,7 +1160,7 @@
     {
       "rendererId": "pdf",
       "id": "pdf-standard-fonts",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/pdf/standard_fonts",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/pdf/standard_fonts",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1169,7 +1169,7 @@
     {
       "rendererId": "pdf",
       "id": "pdf-cjk-font-fallback",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/pdf/fonts",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/pdf/fonts",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1178,7 +1178,7 @@
     {
       "rendererId": "archive",
       "id": "libarchive-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/libarchive/worker-bundle.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/libarchive/worker-bundle.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1187,7 +1187,7 @@
     {
       "rendererId": "archive",
       "id": "libarchive-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/libarchive/libarchive.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/libarchive/libarchive.wasm",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1196,7 +1196,7 @@
     {
       "rendererId": "cad",
       "id": "cad-wasm-directory",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/cad/0.8.0",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/cad/0.8.0",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1205,7 +1205,7 @@
     {
       "rendererId": "cad",
       "id": "cad-dwg-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/cad/0.8.0/dwg-worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/cad/0.8.0/dwg-worker.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1214,7 +1214,7 @@
     {
       "rendererId": "cad",
       "id": "cad-dwf-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/cad/0.8.0/dwfv-render.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/cad/0.8.0/dwfv-render.wasm",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1223,7 +1223,7 @@
     {
       "rendererId": "cad",
       "id": "cad-libredwg-script",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/cad/0.8.0/libredwg-web.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/cad/0.8.0/libredwg-web.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1232,7 +1232,7 @@
     {
       "rendererId": "cad",
       "id": "cad-libredwg-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/cad/0.8.0/libredwg-web.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/cad/0.8.0/libredwg-web.wasm",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1241,7 +1241,7 @@
     {
       "rendererId": "cad",
       "id": "cad-legacy-dwg-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/cad/dwg-worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/cad/dwg-worker.js",
       "copied": true,
       "required": false,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1250,7 +1250,7 @@
     {
       "rendererId": "cad",
       "id": "cad-legacy-dwf-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/cad/dwfv-render.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/cad/dwfv-render.wasm",
       "copied": true,
       "required": false,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1259,7 +1259,7 @@
     {
       "rendererId": "cad",
       "id": "cad-legacy-libredwg-script",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/cad/libredwg-web.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/cad/libredwg-web.js",
       "copied": true,
       "required": false,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1268,7 +1268,7 @@
     {
       "rendererId": "cad",
       "id": "cad-legacy-libredwg-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/cad/libredwg-web.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/cad/libredwg-web.wasm",
       "copied": true,
       "required": false,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1277,7 +1277,7 @@
     {
       "rendererId": "office-word-openxml",
       "id": "docx-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/docx/docx.worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/docx/docx.worker.js",
       "copied": true,
       "required": false,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1286,7 +1286,7 @@
     {
       "rendererId": "office-word-openxml",
       "id": "docx-worker-jszip",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/docx/jszip.min.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/docx/jszip.min.js",
       "copied": true,
       "required": false,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1295,7 +1295,7 @@
     {
       "rendererId": "office-presentation-binary",
       "id": "ppt-module",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/ppt/index.mjs",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/ppt/index.mjs",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1304,7 +1304,7 @@
     {
       "rendererId": "office-presentation-binary",
       "id": "ppt-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/ppt/worker.mjs",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/ppt/worker.mjs",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1313,7 +1313,7 @@
     {
       "rendererId": "office-presentation-binary",
       "id": "ppt-frame-cache",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/ppt/frame-cache.mjs",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/ppt/frame-cache.mjs",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1322,7 +1322,7 @@
     {
       "rendererId": "office-presentation-binary",
       "id": "ppt-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/ppt/ppt-native.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/ppt/ppt-native.wasm",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1331,7 +1331,7 @@
     {
       "rendererId": "office-presentation-binary",
       "id": "ppt-cjk-font",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/ppt/ppt-font-cjk.otf",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/ppt/ppt-font-cjk.otf",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1340,7 +1340,7 @@
     {
       "rendererId": "office-presentation-binary",
       "id": "ppt-runtime-manifest",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/ppt/manifest.json",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/ppt/manifest.json",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1349,7 +1349,7 @@
     {
       "rendererId": "office-presentation-binary",
       "id": "ppt-runtime-package",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/ppt/package.json",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/ppt/package.json",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1358,7 +1358,7 @@
     {
       "rendererId": "office-presentation-binary",
       "id": "ppt-runtime-license",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/ppt/LICENSE",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/ppt/LICENSE",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1367,7 +1367,7 @@
     {
       "rendererId": "office-presentation-binary",
       "id": "ppt-runtime-notice",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/ppt/NOTICE",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/ppt/NOTICE",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1376,7 +1376,7 @@
     {
       "rendererId": "office-presentation",
       "id": "pptx-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/pptx/pptx.worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/pptx/pptx.worker.js",
       "copied": true,
       "required": false,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1385,7 +1385,7 @@
     {
       "rendererId": "spreadsheet-openxml",
       "id": "spreadsheet-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/xlsx/sheet.worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/xlsx/sheet.worker.js",
       "copied": true,
       "required": false,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1394,7 +1394,7 @@
     {
       "rendererId": "apple-pages",
       "id": "apple-pages-iwork-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/iwork/iwork.worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/iwork/iwork.worker.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1403,7 +1403,7 @@
     {
       "rendererId": "apple-numbers",
       "id": "apple-numbers-iwork-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/iwork/iwork.worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/iwork/iwork.worker.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1412,7 +1412,7 @@
     {
       "rendererId": "apple-keynote",
       "id": "apple-keynote-iwork-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/iwork/iwork.worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/iwork/iwork.worker.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1421,7 +1421,7 @@
     {
       "rendererId": "office-hangul",
       "id": "hangul-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/hangul/hangul.worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/hangul/hangul.worker.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1430,7 +1430,7 @@
     {
       "rendererId": "office-wordperfect",
       "id": "wordperfect-worker",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/wordperfect/wordperfect.worker.js",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/wordperfect/wordperfect.worker.js",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1439,7 +1439,7 @@
     {
       "rendererId": "office-wordperfect",
       "id": "wordperfect-libwpd-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/wordperfect/libwpd.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/wordperfect/libwpd.wasm",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1448,7 +1448,7 @@
     {
       "rendererId": "office-wordperfect",
       "id": "wordperfect-libwpd-module",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/vendor/wordperfect/libwpd.mjs",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/vendor/wordperfect/libwpd.mjs",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1457,7 +1457,7 @@
     {
       "rendererId": "typst",
       "id": "typst-compiler-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/typst/typst_ts_web_compiler_bg.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/typst/typst_ts_web_compiler_bg.wasm",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1466,7 +1466,7 @@
     {
       "rendererId": "typst",
       "id": "typst-renderer-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/typst/typst_ts_renderer_bg.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/typst/typst_ts_renderer_bg.wasm",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1475,7 +1475,7 @@
     {
       "rendererId": "typst",
       "id": "typst-font-assets",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/typst/fonts",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/typst/fonts",
       "copied": true,
       "required": true,
       "sourcePackage": "file-viewer-copy-assets",
@@ -1484,7 +1484,7 @@
     {
       "rendererId": "data-asset",
       "id": "data-sql-wasm",
-      "to": "/root/code/supabase-platform/erp-admin/apps/web-antd/public/file-viewer/wasm/data/sql-wasm.wasm",
+      "to": "/root/code/go-admin-ui/apps/web-antd/public/file-viewer/wasm/data/sql-wasm.wasm",
       "copied": true,
       "required": false,
       "sourcePackage": "file-viewer-copy-assets",

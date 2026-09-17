@@ -33,6 +33,14 @@ jobs:
       - name: Setup Node and pnpm
         uses: ./.github/actions/setup-node
 
+      - name: Reject legacy backend references
+        shell: bash
+        run: |
+          if git grep -IinE 's[u]pabase|@[s]upabase|s[u]pabase-js'; then
+            echo 'Legacy backend reference detected.' >&2
+            exit 1
+          fi
+
       - name: Unit tests
         run: pnpm run test:unit
 
