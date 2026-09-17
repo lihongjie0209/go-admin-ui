@@ -305,6 +305,7 @@ defineExpose({ dirty, requestClose, save, values });
         <Switch
           v-if="field.component === 'switch'"
           v-model:checked="values[field.field] as boolean"
+          :aria-label="field.label"
           :disabled="saving || mode === 'detail'"
         />
         <GoDictionaryTreeSelect
@@ -312,6 +313,7 @@ defineExpose({ dirty, requestClose, save, values });
             field.component === 'dictionary-tree' && field.dictionaryKey
           "
           v-model:value="values[field.field] as string | string[]"
+          :aria-label="field.label"
           :dictionary-key="field.dictionaryKey"
           :disabled="saving || mode === 'detail'"
           :multiple="field.multiple"
@@ -321,6 +323,7 @@ defineExpose({ dirty, requestClose, save, values });
         <GoDictionarySelect
           v-else-if="field.dictionaryKey"
           v-model:value="values[field.field] as string | string[]"
+          :aria-label="field.label"
           :dictionary-key="field.dictionaryKey"
           :disabled="saving || mode === 'detail'"
           :multiple="field.multiple"
@@ -330,6 +333,7 @@ defineExpose({ dirty, requestClose, save, values });
         <InputNumber
           v-else-if="field.component === 'number'"
           v-model:value="values[field.field] as number"
+          :aria-label="field.label"
           class="w-full"
           :disabled="saving || mode === 'detail'"
           :placeholder="field.placeholder"
@@ -337,12 +341,14 @@ defineExpose({ dirty, requestClose, save, values });
         <GoIconPicker
           v-else-if="field.component === 'icon'"
           v-model="values[field.field] as string"
+          :aria-label="field.label"
           :disabled="saving || mode === 'detail'"
           :placeholder="field.placeholder"
         />
         <DatePicker
           v-else-if="field.component === 'datetime'"
           v-model:value="values[field.field] as any"
+          :aria-label="field.label"
           class="w-full"
           :disabled="saving || mode === 'detail'"
           show-time
@@ -351,6 +357,7 @@ defineExpose({ dirty, requestClose, save, values });
         <Select
           v-else-if="field.component === 'select'"
           v-model:value="values[field.field] as any"
+          :aria-label="field.label"
           :disabled="saving || mode === 'detail'"
           :loading="optionLoading[field.field]"
           :mode="field.multiple ? 'multiple' : undefined"
@@ -363,6 +370,7 @@ defineExpose({ dirty, requestClose, save, values });
             field.component === 'textarea' || field.component === 'json'
           "
           v-model:value="values[field.field] as string"
+          :aria-label="field.label"
           :disabled="saving || mode === 'detail'"
           :placeholder="field.placeholder"
           :rows="field.component === 'json' ? 8 : 4"
@@ -370,6 +378,7 @@ defineExpose({ dirty, requestClose, save, values });
         <Input.Password
           v-else-if="field.component === 'password'"
           v-model:value="values[field.field] as string"
+          :aria-label="field.label"
           autocomplete="new-password"
           :disabled="saving || mode === 'detail'"
           :placeholder="field.placeholder"
@@ -377,6 +386,7 @@ defineExpose({ dirty, requestClose, save, values });
         <Input
           v-else
           v-model:value="values[field.field] as string"
+          :aria-label="field.label"
           :disabled="saving || mode === 'detail'"
           :placeholder="field.placeholder"
         />

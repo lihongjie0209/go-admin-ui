@@ -52,6 +52,7 @@
     "test:benchmark": "vitest bench --run",
     "test:unit": "vitest run --dom",
     "test:e2e": "turbo run test:e2e",
+    "test:e2e:platform": "playwright test",
     "update:deps": "npx taze -r -w",
     "version": "pnpm exec changeset version && pnpm install --no-frozen-lockfile",
     "catalog": "pnpm dlx codemod pnpm/catalog"

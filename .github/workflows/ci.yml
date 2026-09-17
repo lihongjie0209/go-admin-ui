@@ -61,3 +61,20 @@ jobs:
 
       - name: Production build
         run: pnpm run build:antd
+
+  browser:
+    name: Platform browser contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node and pnpm
+        uses: ./.github/actions/setup-node
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run platform browser tests
+        run: pnpm run test:e2e:platform
