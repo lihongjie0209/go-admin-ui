@@ -7,6 +7,7 @@ describe('normalizeApiError', () => {
     const error = normalizeApiError({
       response: {
         data: {
+          body: { field_errors: { name: '名称已存在' } },
           code: 40_903,
           message: '数据版本已变化',
           request_id: 'request-123',
@@ -18,10 +19,12 @@ describe('normalizeApiError', () => {
     expect(error).toBeInstanceOf(ApiClientError);
     expect(error).toMatchObject({
       code: 40_903,
+      fieldErrors: { name: '名称已存在' },
       message: '数据版本已变化（请求 ID：request-123）',
       name: 'ApiClientError',
       requestID: 'request-123',
       status: 409,
+      userMessage: '数据版本已变化',
     });
   });
 

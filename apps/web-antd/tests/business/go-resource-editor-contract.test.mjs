@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { ApiClientError } from '../../src/api/go/api-error';
 import {
   editorFields,
   editorFingerprint,
@@ -79,6 +80,24 @@ describe('resource editor contract', () => {
       fieldErrors: { name: '名称已存在' },
       message: '版本冲突',
       requestID: 'req-1',
+      versionConflict: true,
+    });
+  });
+
+  it('extracts structured metadata after request error normalization', () => {
+    expect(
+      extractEditorFailure(
+        new ApiClientError('版本冲突', {
+          code: 30_011,
+          fieldErrors: { name: '名称已存在' },
+          requestID: 'req-normalized',
+          status: 409,
+        }),
+      ),
+    ).toEqual({
+      fieldErrors: { name: '名称已存在' },
+      message: '版本冲突',
+      requestID: 'req-normalized',
       versionConflict: true,
     });
   });

@@ -139,15 +139,20 @@ export function editorFingerprint(value: Record<string, unknown>) {
 
 export function extractEditorFailure(error: unknown): EditorFailure {
   const candidate = error as {
+    code?: number | string;
+    fieldErrors?: Record<string, string>;
     message?: string;
+    requestID?: string;
     response?: { data?: Record<string, unknown> };
+    userMessage?: string;
   };
   const data = candidate?.response?.data ?? {};
   const body =
     data.body && typeof data.body === 'object'
       ? (data.body as Record<string, unknown>)
       : {};
-  const rawErrors = body.field_errors ?? data.field_errors;
+  const rawErrors =
+    candidate.fieldErrors ?? body.field_errors ?? data.field_errors;
   const fieldErrors =
     rawErrors && typeof rawErrors === 'object'
       ? Object.fromEntries(
@@ -156,13 +161,19 @@ export function extractEditorFailure(error: unknown): EditorFailure {
           ),
         )
       : {};
-  const code = Number(data.code ?? body.code ?? 0);
+  const code = Number(candidate.code ?? data.code ?? body.code ?? 0);
   return {
     fieldErrors,
     message: String(
-      data.message ?? body.message ?? candidate?.message ?? '保存失败',
+      candidate.userMessage ??
+        data.message ??
+        body.message ??
+        candidate?.message ??
+        '保存失败',
     ),
-    requestID: String(data.request_id ?? body.request_id ?? ''),
+    requestID: String(
+      candidate.requestID ?? data.request_id ?? body.request_id ?? '',
+    ),
     versionConflict: code === API_CODE_VERSION_CONFLICT,
   };
 }
