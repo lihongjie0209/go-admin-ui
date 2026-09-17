@@ -10,14 +10,13 @@ import { useAccessStore, useTabbarStore } from '@vben/stores';
 
 import { Button, Empty, Input, message, Spin, Tag } from 'ant-design-vue';
 
-import { clearApplicationContext } from '#/api/core/menu';
 import {
   getAvailableTenantContexts,
   getPersistedTenantContext,
-  invalidateDictionaryCache,
   switchTenantContext,
 } from '#/api/go';
 import { resetRoutes } from '#/router';
+import { clearPrincipalScopedState } from '#/security/principal-state';
 
 const accessStore = useAccessStore();
 const tabbarStore = useTabbarStore();
@@ -61,8 +60,7 @@ async function selectTenant(tenant: AvailableTenantContext) {
     const result = await switchTenantContext(tenant.tenant_id);
     accessStore.setAccessToken(result.access_token);
     currentTenantID.value = tenant.tenant_id;
-    clearApplicationContext();
-    invalidateDictionaryCache();
+    clearPrincipalScopedState();
     tabbarStore.$reset();
     resetRoutes();
     accessStore.setAccessCodes([]);

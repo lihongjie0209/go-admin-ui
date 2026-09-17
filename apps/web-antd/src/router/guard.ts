@@ -5,7 +5,7 @@ import { preferences } from '@vben/preferences';
 import { useAccessStore, useUserStore } from '@vben/stores';
 import { startProgress, stopProgress } from '@vben/utils';
 
-import { clearApplicationContext, selectApplication } from '#/api/core/menu';
+import { selectApplication } from '#/api/core/menu';
 import {
   createNavigationTelemetryEvent,
   recordFrontendEventBestEffort,
@@ -16,6 +16,7 @@ import {
   isPasswordChangeRequired,
 } from '#/api/go/token-vault';
 import { accessRoutes, coreRouteNames } from '#/router/routes';
+import { clearPrincipalScopedState } from '#/security/principal-state';
 import { useAuthStore } from '#/store';
 
 import { generateAccess } from './access';
@@ -93,7 +94,7 @@ function setupAccessGuard(router: Router) {
       accessStore.setIsAccessChecked(false);
       accessStore.setLoginExpired(false);
       userStore.setUserInfo(null);
-      clearApplicationContext();
+      clearPrincipalScopedState();
       clearPasswordChangeRequired();
       clearRefreshToken();
     };
