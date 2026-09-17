@@ -3,6 +3,7 @@ public
 **/dummy-non-existing-folder/file-viewer
 __tests__
 coverage
+.backend-contract
 .codex
 .claude
 .agent

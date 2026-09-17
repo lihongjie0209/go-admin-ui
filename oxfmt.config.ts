@@ -13,6 +13,7 @@ export default defineConfig({
     'node_modules',
     '.nvmrc',
     'coverage',
+    '.backend-contract',
     'CODEOWNERS',
     '.nitro',
     '.output',
