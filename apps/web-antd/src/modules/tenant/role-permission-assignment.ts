@@ -5,12 +5,27 @@ export interface TenantRoleReference {
   version: number;
 }
 
-interface PermissionView {
+export interface PermissionView {
   action: string;
   id: string;
   name: string;
   permission_key: string;
   resource: string;
+}
+
+export async function loadAssignablePermissionOptions(
+  _values: Readonly<Record<string, unknown>>,
+  signal: AbortSignal,
+) {
+  const permissions = await requestClient.post<PermissionView[]>(
+    '/tenant-authorization/assignable-permissions',
+    {},
+    { signal },
+  );
+  return permissions.map((permission) => ({
+    label: `${permission.name}（${permission.permission_key}）`,
+    value: permission.id,
+  }));
 }
 
 export interface RolePermissionSelection {

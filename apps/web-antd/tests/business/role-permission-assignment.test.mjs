@@ -4,14 +4,42 @@ const api = vi.hoisted(() => ({ post: vi.fn() }));
 
 vi.mock('#/api/request', () => ({ requestClient: api }));
 
-const { loadRolePermissionAssignment, saveRolePermissionAssignment } =
-  await import('../../src/modules/tenant/role-permission-assignment.ts');
+const {
+  loadAssignablePermissionOptions,
+  loadRolePermissionAssignment,
+  saveRolePermissionAssignment,
+} = await import('../../src/modules/tenant/role-permission-assignment.ts');
 
 beforeEach(() => {
   api.post.mockReset();
 });
 
 describe('role permission assignment', () => {
+  it('loads assignable permissions as role-create editor options', async () => {
+    api.post.mockResolvedValueOnce([
+      {
+        action: 'read',
+        id: 'permission-1',
+        name: '查看成员',
+        permission_key: 'tenant.member.read',
+        resource: 'tenant.member',
+      },
+    ]);
+    const signal = new AbortController().signal;
+
+    await expect(loadAssignablePermissionOptions({}, signal)).resolves.toEqual([
+      {
+        label: '查看成员（tenant.member.read）',
+        value: 'permission-1',
+      },
+    ]);
+    expect(api.post).toHaveBeenCalledWith(
+      '/tenant-authorization/assignable-permissions',
+      {},
+      { signal },
+    );
+  });
+
   it('loads only assignable permissions and maps the current role selection', async () => {
     const signal = new AbortController().signal;
     api.post

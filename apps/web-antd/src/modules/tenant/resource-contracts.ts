@@ -3,6 +3,8 @@ import type {
   TreeResourcePageContract,
 } from '#/templates/resource/resource-page-contract';
 
+import { loadAssignablePermissionOptions } from './role-permission-assignment';
+
 const statusOptions = [
   { label: '启用', value: 'active' },
   { label: '停用', value: 'disabled' },
@@ -189,6 +191,13 @@ export const tenantMemberPageContract: FlatResourcePageContract = {
 
 export const tenantRolePageContract: FlatResourcePageContract = {
   authorizationResource: 'tenant.role',
+  capabilities: [
+    {
+      action: 'read',
+      key: 'tenant.authorization:read',
+      resource: 'tenant.authorization',
+    },
+  ],
   detailFields: [
     { field: 'code', label: '角色编码' },
     { field: 'name', label: '角色名称' },
@@ -210,11 +219,14 @@ export const tenantRolePageContract: FlatResourcePageContract = {
     { field: 'name', label: '角色名称', required: true },
     { component: 'textarea', field: 'description', label: '说明' },
     {
-      component: 'hidden',
+      component: 'select',
       createOnly: true,
       defaultValue: [],
       field: 'permission_ids',
-      label: '权限',
+      label: '初始权限',
+      multiple: true,
+      optionLoader: loadAssignablePermissionOptions,
+      placeholder: '从当前账号可分配的权限中选择',
     },
     {
       component: 'select',

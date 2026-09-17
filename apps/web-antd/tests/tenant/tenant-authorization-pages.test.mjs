@@ -66,6 +66,7 @@ vi.mock('#/modules/tenant/member-role-assignment', () => ({
   saveMemberRoleAssignment: state.saveMemberRoles,
 }));
 vi.mock('#/modules/tenant/role-permission-assignment', () => ({
+  loadAssignablePermissionOptions: vi.fn().mockResolvedValue([]),
   loadRolePermissionAssignment: state.loadRolePermissions,
   saveRolePermissionAssignment: state.saveRolePermissions,
 }));
