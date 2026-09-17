@@ -20,10 +20,33 @@ export async function requestFileDownload(id: string): Promise<FileDownload> {
 }
 
 export function openFileDownload(download: FileDownload) {
+  let url: URL;
+  try {
+    url = new URL(String(download.url ?? ''), window.location.origin);
+  } catch {
+    throw new Error('服务器返回的文件下载地址无效');
+  }
+  if (
+    (url.protocol !== 'http:' && url.protocol !== 'https:') ||
+    url.username ||
+    url.password
+  ) {
+    throw new Error('服务器返回的文件下载地址不安全');
+  }
+  const suggestedName = String(download.file?.original_name ?? 'download')
+    .split(/[\\/]/u)
+    .at(-1);
+  const originalName = [...(suggestedName ?? '')]
+    .filter((character) => {
+      const codePoint = character.codePointAt(0) ?? 0;
+      return codePoint >= 32 && codePoint !== 127;
+    })
+    .join('')
+    .trim();
   const anchor = document.createElement('a');
-  anchor.href = download.url;
+  anchor.href = url.href;
   anchor.rel = 'noopener noreferrer';
-  anchor.download = String(download.file.original_name ?? '');
+  anchor.download = originalName || 'download';
   anchor.style.display = 'none';
   document.body.append(anchor);
   anchor.click();

@@ -58,6 +58,48 @@ describe('file management actions', () => {
     click.mockRestore();
   });
 
+  it.each([
+    'javascript:alert(document.cookie)',
+    'data:text/html,<script>alert(1)</script>',
+    'https://user:password@storage.example/signed',
+  ])(
+    'rejects an unsafe signed download URL without browser navigation: %s',
+    (url) => {
+      const click = vi
+        .spyOn(HTMLAnchorElement.prototype, 'click')
+        .mockImplementation(() => {});
+
+      expect(() =>
+        openFileDownload({
+          expires_at: '2026-09-18T01:00:00+08:00',
+          file: { original_name: 'report.txt' },
+          url,
+        }),
+      ).toThrow('文件下载地址不安全');
+      expect(click).not.toHaveBeenCalled();
+      expect(document.querySelector('a')).toBeNull();
+      click.mockRestore();
+    },
+  );
+
+  it('removes path and control characters from the suggested filename', () => {
+    let filename = '';
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(function () {
+        filename = this.download;
+      });
+
+    openFileDownload({
+      expires_at: '2026-09-18T01:00:00+08:00',
+      file: { original_name: '../exports/report\u0000.csv' },
+      url: '/api/v1/files/content/token',
+    });
+
+    expect(filename).toBe('report.csv');
+    click.mockRestore();
+  });
+
   it('formats file sizes for table and detail presentation', () => {
     expect(formatBytes(512)).toBe('512 B');
     expect(formatBytes(1536)).toBe('1.50 KB');
