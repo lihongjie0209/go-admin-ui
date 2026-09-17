@@ -17,21 +17,25 @@ const props = withDefaults(
 );
 
 const emit = defineEmits<{ 'update:open': [value: boolean] }>();
-const copied = ref(false);
-const canClose = computed(() => copied.value || !props.secret);
+const acknowledged = ref(false);
+const canClose = computed(() => acknowledged.value || !props.secret);
 
 watch(
   () => [props.open, props.secret],
   ([open]) => {
-    if (open) copied.value = false;
+    if (open) acknowledged.value = false;
   },
 );
 
 async function copySecret() {
   if (!props.secret) return;
-  await navigator.clipboard.writeText(props.secret);
-  copied.value = true;
-  message.success('密钥已复制');
+  try {
+    await navigator.clipboard.writeText(props.secret);
+    acknowledged.value = true;
+    message.success('密钥已复制');
+  } catch {
+    message.error('自动复制失败，请手动复制密钥');
+  }
 }
 
 function close() {
@@ -41,11 +45,17 @@ function close() {
   }
   emit('update:open', false);
 }
+
+function confirmSaved() {
+  acknowledged.value = true;
+  emit('update:open', false);
+}
 </script>
 
 <template>
   <Modal
     :closable="canClose"
+    destroy-on-close
     :keyboard="false"
     :mask-closable="false"
     :open="open"
@@ -59,9 +69,7 @@ function close() {
     <template #footer>
       <Space>
         <Button @click="copySecret">复制密钥</Button>
-        <Button :disabled="!canClose" type="primary" @click="close">
-          我已安全保存
-        </Button>
+        <Button type="primary" @click="confirmSaved"> 我已安全保存 </Button>
       </Space>
     </template>
   </Modal>

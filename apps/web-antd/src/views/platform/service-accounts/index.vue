@@ -25,6 +25,11 @@ function revealSecret(value: string) {
   secretOpen.value = true;
 }
 
+function updateSecretOpen(value: boolean) {
+  secretOpen.value = value;
+  if (!value) secret.value = '';
+}
+
 const contract = {
   ...serviceAccountPageContract,
   capabilities: [
@@ -61,9 +66,10 @@ const contract = {
   >
     <FlatResourcePage ref="page" :contract="contract" />
     <GoSecretRevealModal
-      v-model:open="secretOpen"
+      :open="secretOpen"
       :secret="secret"
       title="保存服务账号密钥"
+      @update:open="updateSecretOpen"
     />
   </Page>
 </template>

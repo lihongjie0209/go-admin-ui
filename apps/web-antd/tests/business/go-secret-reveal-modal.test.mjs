@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import SecretRevealModal from '../../src/components/business/GoSecretRevealModal.vue';
 
 const state = vi.hoisted(() => ({
+  error: vi.fn(),
   success: vi.fn(),
   warning: vi.fn(),
   writeText: vi.fn(),
@@ -52,7 +53,11 @@ vi.mock('ant-design-vue', () => {
             : null,
     }),
     Space: Box,
-    message: { success: state.success, warning: state.warning },
+    message: {
+      error: state.error,
+      success: state.success,
+      warning: state.warning,
+    },
   };
 });
 
@@ -68,6 +73,7 @@ async function flush() {
 
 beforeEach(() => {
   state.success.mockReset();
+  state.error.mockReset();
   state.warning.mockReset();
   state.writeText.mockReset().mockResolvedValue(undefined);
   Object.defineProperty(navigator, 'clipboard', {
@@ -82,7 +88,7 @@ afterEach(() => {
 });
 
 describe('go secret reveal modal', () => {
-  it('requires copying the one-time secret before closing', async () => {
+  it('supports explicit acknowledgement and successful clipboard copy', async () => {
     const updates = vi.fn();
     root = document.createElement('div');
     document.body.append(root);
@@ -101,7 +107,7 @@ describe('go secret reveal modal', () => {
     expect(
       buttons().find((item) => item.textContent.includes('我已安全保存'))
         .disabled,
-    ).toBe(true);
+    ).toBe(false);
     buttons()
       .find((item) => item.textContent.includes('复制密钥'))
       .click();
@@ -116,6 +122,32 @@ describe('go secret reveal modal', () => {
     buttons()
       .find((item) => item.textContent.includes('我已安全保存'))
       .click();
+    expect(updates).toHaveBeenCalledWith(false);
+  });
+
+  it('keeps manual acknowledgement available when clipboard access fails', async () => {
+    state.writeText.mockRejectedValueOnce(new Error('clipboard denied'));
+    const updates = vi.fn();
+    root = document.createElement('div');
+    document.body.append(root);
+    app = createApp({
+      setup: () => () =>
+        h(SecretRevealModal, {
+          'onUpdate:open': updates,
+          open: true,
+          secret: 'secret-once',
+        }),
+    });
+    app.mount(root);
+    await flush();
+
+    const buttons = [...root.querySelectorAll('button')];
+    buttons.find((item) => item.textContent.includes('复制密钥')).click();
+    await flush();
+    expect(state.error).toHaveBeenCalledWith('自动复制失败，请手动复制密钥');
+    expect(updates).not.toHaveBeenCalled();
+
+    buttons.find((item) => item.textContent.includes('我已安全保存')).click();
     expect(updates).toHaveBeenCalledWith(false);
   });
 });
