@@ -1,4 +1,4 @@
-import { requestClient } from '#/api/request';
+import { publicRequestClient } from '#/api/request';
 
 export interface DictionaryOption {
   badge?: boolean;
@@ -75,7 +75,7 @@ function toItem(item: DictionaryResultItem): DynamicDictionaryItem {
 }
 
 export async function queryDictionary(query: DictionaryQuery) {
-  const result = await requestClient.post<DictionaryResult>(
+  const result = await publicRequestClient.post<DictionaryResult>(
     '/public/dictionaries/query',
     {
       code: query.dictionary_key,
