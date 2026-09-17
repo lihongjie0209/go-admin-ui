@@ -9,7 +9,8 @@ import type {
   TreeRecord,
 } from '#/components/foundation/tree-contract';
 
-import { computed, onScopeDispose, ref, watch } from 'vue';
+import { computed, inject, onScopeDispose, ref, watch } from 'vue';
+import { routeLocationKey } from 'vue-router';
 
 import {
   Alert,
@@ -23,6 +24,7 @@ import {
   Tree,
 } from 'ant-design-vue';
 
+import { trackFrontendAction } from '#/api/go';
 import { createTreeResourceApi } from '#/api/go/tree-resource';
 import {
   canMoveTreeNode,
@@ -62,6 +64,7 @@ const emit = defineEmits<{
   select: [node: NormalizedTreeRecord | null];
 }>();
 
+const route = inject(routeLocationKey, null);
 const api = createTreeResourceApi<TreeRecord & VersionedRecord>({
   endpoints: props.endpoints,
   toTreeRequest: props.mapTreeRequest,
@@ -180,8 +183,11 @@ function selectNode(keys: Array<number | string>) {
 }
 
 async function createNode(values: Record<string, unknown>) {
-  await api.create(values);
+  const result = await trackFrontendAction(actionEvent('create'), () =>
+    api.create(values),
+  );
   await load();
+  return result;
 }
 
 async function updateNode(
@@ -198,15 +204,30 @@ async function updateNode(
   ) {
     throw new Error('不能将节点移动到自身、后代或不存在的父节点下');
   }
-  await api.update(values, current as TreeRecord & VersionedRecord);
+  const result = await trackFrontendAction(
+    actionEvent('update', current.id),
+    () => api.update(values, current as TreeRecord & VersionedRecord),
+  );
   await load();
+  return result;
 }
 
 async function deleteNode(current: NormalizedTreeRecord) {
   if (current.children.length > 0) throw new Error('只能删除叶子节点');
-  await api.delete(current as TreeRecord & VersionedRecord);
+  await trackFrontendAction(actionEvent('delete', current.id), () =>
+    api.delete(current as TreeRecord & VersionedRecord),
+  );
   selectedID.value = '';
   await load();
+}
+
+function actionEvent(action: string, resourceID = '') {
+  return {
+    application_id: String(route?.meta.applicationId ?? ''),
+    event_name: `${props.authorizationResource}:${action}`,
+    page_route: route?.path ?? '',
+    resource_id: resourceID,
+  };
 }
 
 async function removeSelected() {

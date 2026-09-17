@@ -10,6 +10,7 @@ const state = vi.hoisted(() => ({
   delete: vi.fn(),
   evaluate: vi.fn(),
   success: vi.fn(),
+  track: vi.fn(),
   tree: vi.fn(),
   update: vi.fn(),
 }));
@@ -17,6 +18,7 @@ const state = vi.hoisted(() => ({
 vi.mock('../../src/api/go', async (loadOriginal) => ({
   ...(await loadOriginal()),
   evaluateCapabilities: state.evaluate,
+  trackFrontendAction: state.track,
 }));
 vi.mock('../../src/api/go/tree-resource', () => ({
   createTreeResourceApi: () => ({
@@ -115,6 +117,7 @@ const capabilities = ['list', 'create', 'update', 'delete'].map((action) => ({
 let app;
 let root;
 let selected;
+let treeResource;
 
 async function flush() {
   for (let index = 0; index < 8; index++) {
@@ -139,6 +142,7 @@ async function mount() {
               endpoints,
               fixedFilters: { tenant_id: 'tenant-1' },
               onSelect: selected,
+              ref: (value) => (treeResource = value),
             }),
         },
       ),
@@ -153,6 +157,7 @@ beforeEach(() => {
     state.delete,
     state.evaluate,
     state.success,
+    state.track,
     state.tree,
     state.update,
   ])
@@ -179,6 +184,7 @@ beforeEach(() => {
     },
   ]);
   state.delete.mockResolvedValue(undefined);
+  state.track.mockImplementation(async (_event, operation) => operation());
 });
 
 afterEach(() => {
@@ -217,5 +223,53 @@ describe('tree resource integration', () => {
     );
     expect(state.tree).toHaveBeenCalledTimes(2);
     expect(state.success).toHaveBeenCalledWith('删除成功');
+    expect(state.track).toHaveBeenCalledWith(
+      {
+        application_id: '',
+        event_name: 'tenant.department:delete',
+        page_route: '',
+        resource_id: 'leaf',
+      },
+      expect.any(Function),
+    );
+  });
+
+  it('tracks create and update writes before refreshing the tree', async () => {
+    await mount();
+    const current = {
+      children: [],
+      id: 'leaf',
+      name: 'Leaf',
+      parent_id: 'root',
+      sort_order: 1,
+      version: 2,
+    };
+
+    await treeResource.createNode({ name: 'New root', parent_id: null });
+    await treeResource.updateNode({ name: 'Changed leaf' }, current);
+
+    expect(state.create).toHaveBeenCalledWith({
+      name: 'New root',
+      parent_id: null,
+    });
+    expect(state.update).toHaveBeenCalledWith(
+      { name: 'Changed leaf' },
+      current,
+    );
+    expect(state.track.mock.calls.map(([event]) => event)).toEqual([
+      {
+        application_id: '',
+        event_name: 'tenant.department:create',
+        page_route: '',
+        resource_id: '',
+      },
+      {
+        application_id: '',
+        event_name: 'tenant.department:update',
+        page_route: '',
+        resource_id: 'leaf',
+      },
+    ]);
+    expect(state.tree).toHaveBeenCalledTimes(3);
   });
 });
