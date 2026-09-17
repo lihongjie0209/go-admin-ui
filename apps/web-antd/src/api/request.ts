@@ -20,6 +20,7 @@ import { useAuthStore } from '#/store';
 import { refreshTokenApi } from './core';
 import { normalizeApiError } from './go/api-error';
 import { API_CODE_OK } from './go/contracts';
+import { ensureRequestID } from './go/request-id';
 import { restorePersistedTenantContext } from './go/tenant-context-storage';
 import { applyRequestContentType } from './request-content-type';
 
@@ -81,6 +82,7 @@ function createRequestClient(
       if (authenticated) {
         config.headers.Authorization = formatToken(accessStore.accessToken);
       }
+      ensureRequestID(config.headers);
       config.headers['Accept-Language'] = preferences.app.locale;
       // The browser must add the multipart boundary. A manually supplied
       // content type produces an invalid upload body.

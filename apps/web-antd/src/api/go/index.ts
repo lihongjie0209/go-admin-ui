@@ -5,6 +5,7 @@ export * from './dictionary';
 export * from './dictionary-cache';
 export * from './frontend-telemetry';
 export * from './pbac-resources';
+export * from './request-id';
 export * from './resource';
 export * from './scheduled-job';
 export * from './tenant-context';
