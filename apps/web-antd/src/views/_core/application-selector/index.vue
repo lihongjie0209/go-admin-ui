@@ -29,6 +29,11 @@ import { errorMessage } from '#/components/foundation/error-presentation';
 import GoAccess from '#/components/foundation/GoAccess.vue';
 import GoAuthorizedLoader from '#/components/foundation/GoAuthorizedLoader.vue';
 import GoCapabilityProvider from '#/components/foundation/GoCapabilityProvider.vue';
+import {
+  applicationListCapability,
+  applicationSelectionCapabilities,
+  currentNavigationReadCapability,
+} from '#/modules/platform/application-selection-capabilities';
 import { resetRoutes } from '#/router';
 
 const applications = ref<NavigationApplication[]>([]);
@@ -47,30 +52,6 @@ const menuUsage = ref<
 const applicationUsage = ref<Record<string, { clicks: number; last: string }>>(
   {},
 );
-const listCapability = {
-  action: 'list',
-  key: 'application.current:list',
-  resource: 'application.current',
-};
-const navigationCapability = {
-  action: 'read',
-  key: 'navigation.current:read',
-  resource: 'navigation.current',
-};
-const capabilities = [
-  listCapability,
-  {
-    action: 'read',
-    key: 'application.current:read',
-    resource: 'application.current',
-  },
-  {
-    action: 'switch',
-    key: 'application.current:switch',
-    resource: 'application.current',
-  },
-  navigationCapability,
-];
 
 interface ApplicationTabState {
   lastPath?: string;
@@ -246,13 +227,13 @@ async function loadUsage() {
 
 <template>
   <Page>
-    <GoCapabilityProvider :capabilities="capabilities">
+    <GoCapabilityProvider :capabilities="applicationSelectionCapabilities">
       <GoAuthorizedLoader
-        :authorization="listCapability"
+        :authorization="applicationListCapability"
         :load="loadApplications"
       />
       <GoAuthorizedLoader
-        :authorization="navigationCapability"
+        :authorization="currentNavigationReadCapability"
         :load="loadUsage"
       />
       <GoAccess action="list" resource="application.current">

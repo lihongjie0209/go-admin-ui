@@ -16,7 +16,9 @@ import { Button } from 'ant-design-vue';
 import { getNavigationApplications, selectApplication } from '#/api/core/menu';
 import { getPersistedTenantContext } from '#/api/go/tenant-context-storage';
 import GoApplicationSwitcher from '#/components/business/GoApplicationSwitcher.vue';
+import GoCapabilityProvider from '#/components/foundation/GoCapabilityProvider.vue';
 import { $t } from '#/locales';
+import { applicationSelectionCapabilities } from '#/modules/platform/application-selection-capabilities';
 import { useAuthStore } from '#/store';
 import LoginForm from '#/views/_core/authentication/login.vue';
 
@@ -51,9 +53,11 @@ async function syncApplicationFromRoute(path: string) {
   const applications = await getNavigationApplications();
   if (sequence !== applicationSyncSequence) return;
   const application = applications.find((item) => item.key === applicationKey);
+  const applicationChanged = currentApplicationKey.value !== application?.key;
   currentApplicationName.value = application?.name ?? '未知应用';
   currentApplicationKey.value = application?.key;
-  if (application) await selectApplication(application.key);
+  if (application && applicationChanged)
+    await selectApplication(application.key);
 }
 
 onMounted(() => {
@@ -204,8 +208,10 @@ watch(
       <LockScreen :avatar @to-login="handleLogout" />
     </template>
   </BasicLayout>
-  <GoApplicationSwitcher
-    v-model:open="applicationSwitcherOpen"
-    :current-application-key="currentApplicationKey"
-  />
+  <GoCapabilityProvider :capabilities="applicationSelectionCapabilities">
+    <GoApplicationSwitcher
+      v-model:open="applicationSwitcherOpen"
+      :current-application-key="currentApplicationKey"
+    />
+  </GoCapabilityProvider>
 </template>
