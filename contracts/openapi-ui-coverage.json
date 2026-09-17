@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "covered": [
+    {
+      "path": "/data-permissions/global-policies/create",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/global-policies/get",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/global-policies/page",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/global-policies/publish",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/global-policies/simulate",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/global-policies/status/set",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/global-policies/versions/create",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/global-policies/versions/get",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/global-policies/versions/page",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/tenant-policies/create",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/tenant-policies/get",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/tenant-policies/page",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/tenant-policies/publish",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/tenant-policies/simulate",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/tenant-policies/status/set",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/tenant-policies/versions/create",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/tenant-policies/versions/get",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/data-permissions/tenant-policies/versions/page",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected data-permission scope."
+    },
+    {
+      "path": "/pbac/global-policies/create",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/global-policies/get",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/global-policies/page",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/global-policies/publish",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/global-policies/simulate",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/global-policies/status/set",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/global-policies/versions/create",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/global-policies/versions/get",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/global-policies/versions/page",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/tenant-policies/create",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/tenant-policies/get",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/tenant-policies/page",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/tenant-policies/publish",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/tenant-policies/simulate",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/tenant-policies/status/set",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/tenant-policies/versions/create",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/tenant-policies/versions/get",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    },
+    {
+      "path": "/pbac/tenant-policies/versions/page",
+      "reason": "PolicyLifecycleWorkspace builds this endpoint from the selected PBAC policy scope."
+    }
+  ],
+  "excluded": [
+    {
+      "path": "/.well-known/jwks.json",
+      "reason": "JWKS is a machine-readable verification protocol endpoint and has no operator UI action."
+    },
+    {
+      "path": "/auth/login",
+      "reason": "Service-account credential exchange is consumed by machines; interactive users use auth/user/login."
+    },
+    {
+      "path": "/example/ping",
+      "reason": "The scaffold ping operation is a transport example and is intentionally not a platform feature."
+    },
+    {
+      "path": "/live",
+      "reason": "Liveness is consumed by infrastructure probes and summarized by the protected runtime status page."
+    },
+    {
+      "path": "/me",
+      "reason": "The UI uses the richer profile/get contract; this compact principal endpoint is for API clients."
+    },
+    {
+      "path": "/ready",
+      "reason": "Readiness is consumed by infrastructure probes and summarized by the protected runtime status page."
+    },
+    {
+      "path": "/version",
+      "reason": "Build metadata is already exposed to operators through the protected platform runtime status page."
+    }
+  ]
+}

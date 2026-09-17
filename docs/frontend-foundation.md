@@ -45,6 +45,12 @@ Every page root uses `GoCapabilityProvider` and declares its stable capability k
 
 Reading component source text and asserting that strings are present is not a behavioral test and does not count toward coverage or Definition of Done.
 
+## Backend API ownership gate
+
+CI checks the current `go-api-template` OpenAPI document against the frontend source tree. A literal API path is owned automatically by the module that calls it. Endpoints assembled from bounded variants, such as the PBAC and data-policy scope segments, are listed explicitly in `contracts/openapi-ui-coverage.json`. Protocol and operational endpoints that must not have an operator page are listed separately with a concrete reason.
+
+The gate rejects an unowned backend operation, duplicate declaration, missing reason, and an obsolete declaration that no longer exists in OpenAPI. This is an ownership check rather than proof that a page is behaviorally complete; component and page tests remain mandatory for request payloads, PBAC behavior, loading, cancellation, errors, and presentation.
+
 ## Query and pagination
 
 `GoQueryForm` accepts an explicit field declaration. It emits the backend `keyword` plus typed `filters`, including deduplicated bounded ID lists, explicit `*_from`/`*_to` ranges, and RFC 3339 timestamps with an offset. A field is queryable only when the page declares it; arbitrary client SQL field names are never produced.

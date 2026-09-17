@@ -33,6 +33,15 @@ jobs:
       - name: Setup Node and pnpm
         uses: ./.github/actions/setup-node
 
+      - name: Checkout backend OpenAPI contract
+        uses: actions/checkout@v7
+        with:
+          repository: lihongjie0209/go-api-template
+          path: .backend-contract
+
+      - name: Verify backend API has a frontend owner
+        run: pnpm run check:api-coverage -- .backend-contract/docs/swagger.json
+
       - name: Reject legacy backend references
         shell: bash
         run: |
