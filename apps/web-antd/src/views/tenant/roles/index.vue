@@ -73,6 +73,10 @@ function assignmentSaved() {
       v-model:open="assignmentOpen"
       :load="loadAssignment"
       :save="saveAssignment"
+      :telemetry="{
+        eventName: 'tenant.role:grant',
+        resourceId: String(role?.id ?? ''),
+      }"
       title="分配角色权限"
       @saved="assignmentSaved"
     />

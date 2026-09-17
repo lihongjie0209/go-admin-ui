@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onScopeDispose, ref, watch } from 'vue';
+import { inject, onScopeDispose, ref, watch } from 'vue';
+import { routeLocationKey } from 'vue-router';
 
 import {
   Alert,
@@ -10,6 +11,8 @@ import {
   Spin,
   Transfer,
 } from 'ant-design-vue';
+
+import { trackFrontendAction } from '#/api/go';
 
 export interface SelectionItem {
   description?: string;
@@ -23,11 +26,17 @@ export interface SelectionSnapshot {
   selected: string[];
 }
 
+export interface SelectionTelemetry {
+  eventName: string;
+  resourceId: string;
+}
+
 const props = withDefaults(
   defineProps<{
     load: (signal?: AbortSignal) => Promise<SelectionSnapshot>;
     open: boolean;
     save: (selected: string[]) => Promise<void>;
+    telemetry: SelectionTelemetry;
     title: string;
   }>(),
   {},
@@ -37,6 +46,7 @@ const emit = defineEmits<{
   'update:open': [value: boolean];
 }>();
 
+const route = inject(routeLocationKey, null);
 const items = ref<SelectionItem[]>([]);
 const selected = ref<string[]>([]);
 const loading = ref(false);
@@ -76,7 +86,15 @@ async function saveSelection() {
   if (saving.value) return;
   saving.value = true;
   try {
-    await props.save([...selected.value]);
+    await trackFrontendAction(
+      {
+        application_id: String(route?.meta.applicationId ?? ''),
+        event_name: props.telemetry.eventName,
+        page_route: route?.path ?? '',
+        resource_id: props.telemetry.resourceId,
+      },
+      () => props.save([...selected.value]),
+    );
     message.success('分配已保存');
     emit('saved');
     emit('update:open', false);

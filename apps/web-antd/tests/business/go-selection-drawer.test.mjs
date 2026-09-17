@@ -5,7 +5,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import SelectionDrawer from '../../src/components/business/GoSelectionDrawer.vue';
 
-const state = vi.hoisted(() => ({ success: vi.fn() }));
+const state = vi.hoisted(() => ({ success: vi.fn(), track: vi.fn() }));
+
+vi.mock('../../src/api/go', async (loadOriginal) => ({
+  ...(await loadOriginal()),
+  trackFrontendAction: state.track,
+}));
 
 vi.mock('ant-design-vue', () => {
   const Box = defineComponent({
@@ -74,6 +79,8 @@ beforeEach(() => {
   });
   save = vi.fn().mockResolvedValue(undefined);
   state.success.mockReset();
+  state.track.mockReset();
+  state.track.mockImplementation(async (_event, operation) => operation());
 });
 
 afterEach(() => {
@@ -91,6 +98,10 @@ describe('go selection drawer', () => {
           load,
           open: true,
           save,
+          telemetry: {
+            eventName: 'tenant.member:assign-role',
+            resourceId: 'membership-1',
+          },
           title: '分配角色',
         }),
     });
@@ -106,6 +117,15 @@ describe('go selection drawer', () => {
     await flush();
 
     expect(save).toHaveBeenCalledWith(['role-2']);
+    expect(state.track).toHaveBeenCalledWith(
+      {
+        application_id: '',
+        event_name: 'tenant.member:assign-role',
+        page_route: '',
+        resource_id: 'membership-1',
+      },
+      expect.any(Function),
+    );
     expect(state.success).toHaveBeenCalledWith('分配已保存');
   });
 });

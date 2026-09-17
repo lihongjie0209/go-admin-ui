@@ -123,6 +123,10 @@ function permissionCeilingSaved() {
           v-model:open="permissionsOpen"
           :load="loadPermissionCeiling"
           :save="savePermissionCeiling"
+          :telemetry="{
+            eventName: 'tenant:grant',
+            resourceId: tenant?.id ?? '',
+          }"
           :title="tenant ? `权限上限 · ${tenant.name}` : '权限上限'"
           @saved="permissionCeilingSaved"
         />
