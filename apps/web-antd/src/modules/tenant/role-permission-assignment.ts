@@ -24,15 +24,19 @@ export interface RolePermissionSelection {
 
 export async function loadRolePermissionAssignment(
   roleID: string,
+  signal?: AbortSignal,
 ): Promise<RolePermissionSelection> {
   const [available, assigned] = await Promise.all([
     requestClient.post<PermissionView[]>(
       '/tenant-authorization/assignable-permissions',
       {},
+      { signal },
     ),
-    requestClient.post<PermissionView[]>('/tenant-roles/permissions/get', {
-      id: roleID,
-    }),
+    requestClient.post<PermissionView[]>(
+      '/tenant-roles/permissions/get',
+      { id: roleID },
+      { signal },
+    ),
   ]);
 
   return {

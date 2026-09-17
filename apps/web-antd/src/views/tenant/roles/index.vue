@@ -43,9 +43,9 @@ const contract = {
   },
 };
 
-function loadAssignment() {
+function loadAssignment(signal?: AbortSignal) {
   if (!role.value) return Promise.resolve({ items: [], selected: [] });
-  return loadRolePermissionAssignment(String(role.value.id));
+  return loadRolePermissionAssignment(String(role.value.id), signal);
 }
 
 async function saveAssignment(permissionIDs: string[]) {

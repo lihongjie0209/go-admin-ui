@@ -13,6 +13,7 @@ beforeEach(() => {
 
 describe('role permission assignment', () => {
   it('loads only assignable permissions and maps the current role selection', async () => {
+    const signal = new AbortController().signal;
     api.post
       .mockResolvedValueOnce([
         {
@@ -33,7 +34,9 @@ describe('role permission assignment', () => {
         },
       ]);
 
-    await expect(loadRolePermissionAssignment('role-1')).resolves.toEqual({
+    await expect(
+      loadRolePermissionAssignment('role-1', signal),
+    ).resolves.toEqual({
       items: [
         {
           description: 'tenant.member.read · tenant.member:read',
@@ -47,11 +50,13 @@ describe('role permission assignment', () => {
       1,
       '/tenant-authorization/assignable-permissions',
       {},
+      { signal },
     );
     expect(api.post).toHaveBeenNthCalledWith(
       2,
       '/tenant-roles/permissions/get',
       { id: 'role-1' },
+      { signal },
     );
   });
 
