@@ -10,11 +10,26 @@ import {
   createNavigationTelemetryEvent,
   recordFrontendEventBestEffort,
 } from '#/api/go/frontend-telemetry';
-import { clearRefreshToken } from '#/api/go/token-vault';
+import {
+  clearPasswordChangeRequired,
+  clearRefreshToken,
+  isPasswordChangeRequired,
+} from '#/api/go/token-vault';
 import { accessRoutes, coreRouteNames } from '#/router/routes';
 import { useAuthStore } from '#/store';
 
 import { generateAccess } from './access';
+
+const CHANGE_PASSWORD_PATH = '/auth/change-password';
+
+export function forcedPasswordRoute(
+  path: string,
+  hasAccessToken: boolean,
+  required: boolean,
+) {
+  if (!hasAccessToken || !required || path === CHANGE_PASSWORD_PATH) return;
+  return { path: CHANGE_PASSWORD_PATH, replace: true };
+}
 
 /**
  * 通用守卫配置
@@ -78,6 +93,7 @@ function setupAccessGuard(router: Router) {
       accessStore.setIsAccessChecked(false);
       accessStore.setLoginExpired(false);
       userStore.setUserInfo(null);
+      clearPasswordChangeRequired();
       clearRefreshToken();
     };
     const redirectToLogin = () => ({
@@ -88,6 +104,17 @@ function setupAccessGuard(router: Router) {
           : { redirect: encodeURIComponent(to.fullPath) },
       replace: true,
     });
+
+    const passwordRedirect = forcedPasswordRoute(
+      to.path,
+      Boolean(accessStore.accessToken),
+      isPasswordChangeRequired(),
+    );
+    if (passwordRedirect) return passwordRedirect;
+
+    if (to.path === CHANGE_PASSWORD_PATH && !accessStore.accessToken) {
+      return redirectToLogin();
+    }
 
     // 基本路由，这些路由不需要进入权限拦截
     if (coreRouteNames.includes(to.name as string)) {

@@ -1,7 +1,9 @@
 import { clearPersistedTenantContext } from '#/api/go/tenant-context-storage';
 import {
+  clearPasswordChangeRequired,
   clearRefreshToken,
   getRefreshToken,
+  setPasswordChangeRequired,
   setRefreshToken,
 } from '#/api/go/token-vault';
 import { publicRequestClient } from '#/api/request';
@@ -39,6 +41,7 @@ export async function loginApi(data: AuthApi.LoginParams) {
     },
   );
   setRefreshToken(tokens.refresh_token);
+  setPasswordChangeRequired(tokens.must_change_password);
   return {
     accessToken: tokens.access_token,
     mustChangePassword: tokens.must_change_password,
@@ -52,6 +55,7 @@ export async function refreshTokenApi() {
     refresh_token: refreshToken,
   });
   setRefreshToken(tokens.refresh_token);
+  setPasswordChangeRequired(tokens.must_change_password);
   return {
     data: tokens.access_token,
     status: 200,
@@ -66,6 +70,7 @@ export async function logoutApi() {
         refresh_token: refreshToken,
       });
   } finally {
+    clearPasswordChangeRequired();
     clearRefreshToken();
     clearPersistedTenantContext();
   }

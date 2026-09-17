@@ -2,10 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import { toPageRequest } from '../../src/api/go/resource';
 import {
+  clearPasswordChangeRequired,
   clearRefreshToken,
   getRefreshToken,
+  isPasswordChangeRequired,
+  setPasswordChangeRequired,
   setRefreshToken,
 } from '../../src/api/go/token-vault';
+import { forcedPasswordRoute } from '../../src/router/guard';
 
 describe('go API infrastructure contract', () => {
   it('maps the existing table query into the shared page contract', () => {
@@ -37,5 +41,22 @@ describe('go API infrastructure contract', () => {
     expect(getRefreshToken()).toBe('secret-refresh-token');
     clearRefreshToken();
     expect(getRefreshToken()).toBe('');
+  });
+
+  it('persists forced-password state and redirects business routes', () => {
+    setPasswordChangeRequired(true);
+    expect(isPasswordChangeRequired()).toBe(true);
+    expect(forcedPasswordRoute('/app/platform/users', true, true)).toEqual({
+      path: '/auth/change-password',
+      replace: true,
+    });
+    expect(forcedPasswordRoute('/auth/change-password', true, true)).toBe(
+      undefined,
+    );
+    expect(forcedPasswordRoute('/app/platform/users', false, true)).toBe(
+      undefined,
+    );
+    clearPasswordChangeRequired();
+    expect(isPasswordChangeRequired()).toBe(false);
   });
 });

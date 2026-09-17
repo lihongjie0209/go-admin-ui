@@ -4,6 +4,7 @@ import { loginApi } from './auth';
 
 const mocks = vi.hoisted(() => ({
   post: vi.fn(),
+  setPasswordChangeRequired: vi.fn(),
   setRefreshToken: vi.fn(),
 }));
 
@@ -14,14 +15,17 @@ vi.mock('#/api/go/tenant-context-storage', () => ({
   clearPersistedTenantContext: vi.fn(),
 }));
 vi.mock('#/api/go/token-vault', () => ({
+  clearPasswordChangeRequired: vi.fn(),
   clearRefreshToken: vi.fn(),
   getRefreshToken: vi.fn(),
+  setPasswordChangeRequired: mocks.setPasswordChangeRequired,
   setRefreshToken: mocks.setRefreshToken,
 }));
 
 describe('loginApi', () => {
   beforeEach(() => {
     mocks.post.mockReset();
+    mocks.setPasswordChangeRequired.mockReset();
     mocks.setRefreshToken.mockReset();
   });
 
@@ -47,6 +51,9 @@ describe('loginApi', () => {
     });
     expect(mocks.setRefreshToken).toHaveBeenCalledExactlyOnceWith(
       'refresh-token',
+    );
+    expect(mocks.setPasswordChangeRequired).toHaveBeenCalledExactlyOnceWith(
+      true,
     );
   });
 });
