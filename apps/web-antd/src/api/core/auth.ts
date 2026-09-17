@@ -54,6 +54,12 @@ export async function refreshTokenApi() {
   const tokens = await publicRequestClient.post<TokenResult>('/auth/refresh', {
     refresh_token: refreshToken,
   });
+  // Logout or a newer login may happen while the refresh request is in
+  // flight. Never let an obsolete response resurrect or overwrite that
+  // session.
+  if (getRefreshToken() !== refreshToken) {
+    throw new Error('登录会话已变更');
+  }
   setRefreshToken(tokens.refresh_token);
   setPasswordChangeRequired(tokens.must_change_password);
   return {

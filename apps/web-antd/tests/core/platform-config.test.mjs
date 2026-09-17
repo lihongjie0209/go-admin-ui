@@ -7,7 +7,7 @@ import {
 } from '../../src/api/core/platform-config';
 
 const api = vi.hoisted(() => ({ post: vi.fn() }));
-vi.mock('#/api/request', () => ({ requestClient: api }));
+vi.mock('#/api/request', () => ({ publicRequestClient: api }));
 
 function resetConfig(value = {}) {
   for (const key of Object.keys(publicPlatformConfig)) {

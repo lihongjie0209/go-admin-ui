@@ -57,6 +57,27 @@ export const authenticateResponseInterceptor = ({
   enableRefreshToken: boolean;
   formatToken: (token: string) => null | string;
 }): ResponseInterceptorConfig => {
+  let refreshPromise: null | Promise<string> = null;
+  let reauthenticatePromise: null | Promise<void> = null;
+
+  const reauthenticateOnce = async () => {
+    if (!reauthenticatePromise) {
+      reauthenticatePromise = doReAuthenticate().finally(() => {
+        reauthenticatePromise = null;
+      });
+    }
+    await reauthenticatePromise;
+  };
+
+  const refreshOnce = () => {
+    if (!refreshPromise) {
+      refreshPromise = doRefreshToken().finally(() => {
+        refreshPromise = null;
+      });
+    }
+    return refreshPromise;
+  };
+
   return {
     rejected: async (error) => {
       const { config, response } = error;
@@ -67,44 +88,28 @@ export const authenticateResponseInterceptor = ({
       // 判断是否启用了 refreshToken 功能
       // 如果没有启用或者已经是重试请求了，直接跳转到重新登录
       if (!enableRefreshToken || config.__isRetryRequest) {
-        await doReAuthenticate();
+        await reauthenticateOnce();
         throw error;
       }
-      // 如果正在刷新 token，则将请求加入队列，等待刷新完成
-      if (client.isRefreshing) {
-        return new Promise((resolve) => {
-          client.refreshTokenQueue.push((newToken: string) => {
-            config.headers.Authorization = formatToken(newToken);
-            resolve(client.request(config.url, { ...config }));
-          });
-        });
-      }
 
-      // 标记开始刷新 token
-      client.isRefreshing = true;
-      // 标记当前请求为重试请求，避免无限循环
+      // Every failed request is marked before waiting so a replay can never
+      // recursively enter the refresh flow. Concurrent requests share the
+      // same promise and are all rejected when refresh fails; none are replayed
+      // with an empty or stale credential.
       config.__isRetryRequest = true;
 
+      let newToken: string;
       try {
-        const newToken = await doRefreshToken();
-
-        // 处理队列中的请求
-        client.refreshTokenQueue.forEach((callback) => callback(newToken));
-        // 清空队列
-        client.refreshTokenQueue = [];
-
-        return client.request(error.config.url, { ...error.config });
+        newToken = await refreshOnce();
       } catch (refreshError) {
-        // 如果刷新 token 失败，处理错误（如强制登出或跳转登录页面）
-        client.refreshTokenQueue.forEach((callback) => callback(''));
-        client.refreshTokenQueue = [];
         console.error('Refresh token failed, please login again.');
-        await doReAuthenticate();
+        await reauthenticateOnce();
 
         throw refreshError;
-      } finally {
-        client.isRefreshing = false;
       }
+
+      config.headers.Authorization = formatToken(newToken);
+      return client.request(config.url, { ...config });
     },
   };
 };
