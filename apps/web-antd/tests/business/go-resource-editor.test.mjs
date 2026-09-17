@@ -183,6 +183,7 @@ describe('go resource editor integration', () => {
     const save = [...root.querySelectorAll('button')].find((button) =>
       button.textContent.includes('保存'),
     );
+    expect(save.getAttribute('aria-label')).toBe('保存');
     save.click();
     save.click();
     await flush();

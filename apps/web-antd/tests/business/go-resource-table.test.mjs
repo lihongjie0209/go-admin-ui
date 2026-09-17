@@ -11,6 +11,7 @@ const state = vi.hoisted(() => ({
   create: vi.fn(),
   delete: vi.fn(),
   evaluate: vi.fn(),
+  evaluateRows: vi.fn(),
   page: vi.fn(),
   rowAction: vi.fn(),
   track: vi.fn(),
@@ -26,6 +27,7 @@ vi.mock('../../src/api/go', async (loadOriginal) => ({
     update: state.update,
   }),
   evaluateCapabilities: state.evaluate,
+  evaluateRowCapabilities: state.evaluateRows,
   trackFrontendAction: state.track,
 }));
 
@@ -80,11 +82,13 @@ vi.mock('../../src/components/business/GoDataGrid.vue', () => ({
   }),
 }));
 
-const capabilities = ['list', 'create', 'update', 'delete'].map((action) => ({
-  action,
-  key: `tenant.member:${action}`,
-  resource: 'tenant.member',
-}));
+const capabilities = ['list', 'create', 'update', 'delete', 'assign-role'].map(
+  (action) => ({
+    action,
+    key: `tenant.member:${action}`,
+    resource: 'tenant.member',
+  }),
+);
 
 let app;
 let resourceTable;
@@ -126,9 +130,11 @@ async function mount() {
                   },
                   key: 'assign-role',
                   label: '分配角色',
+                  rowAuthorization: true,
                   run: state.rowAction,
                 },
               ],
+              rowAuthorization: true,
               ref: (value) => (resourceTable = value),
             }),
         },
@@ -143,6 +149,7 @@ beforeEach(() => {
     state.create,
     state.delete,
     state.evaluate,
+    state.evaluateRows,
     state.page,
     state.rowAction,
     state.track,
@@ -156,6 +163,14 @@ beforeEach(() => {
   state.page.mockResolvedValue({
     items: [{ id: 'row-1', name: 'Member', version: 7 }],
     total: 1,
+  });
+  state.evaluateRows.mockResolvedValue({
+    items: [
+      {
+        actions: { 'assign-role': true, delete: true, update: true },
+        resource_id: 'row-1',
+      },
+    ],
   });
   state.create.mockResolvedValue({});
   state.update.mockResolvedValue({});
@@ -210,6 +225,9 @@ describe('go resource table integration', () => {
   it('tracks custom row actions with their authorization identity and row ID', async () => {
     await mount();
 
+    await state.childProps.dataProvider({ filters: {}, page: 1, pageSize: 20 });
+    await flush();
+
     root.querySelector('[data-row-action]').click();
     await flush();
 
@@ -223,6 +241,31 @@ describe('go resource table integration', () => {
       },
       expect.any(Function),
     );
+  });
+
+  it('applies row decisions to custom actions that opt into object authorization', async () => {
+    await mount();
+    await state.childProps.dataProvider({ filters: {}, page: 1, pageSize: 20 });
+    await flush();
+
+    expect(state.evaluateRows).toHaveBeenCalledWith(
+      'tenant.member',
+      ['update', 'delete', 'assign-role'],
+      ['row-1'],
+    );
+    expect(state.childProps.rowActions[0].visible({ id: 'row-1' })).toBe(true);
+
+    state.evaluateRows.mockResolvedValueOnce({
+      items: [
+        {
+          actions: { 'assign-role': false, delete: true, update: true },
+          resource_id: 'row-1',
+        },
+      ],
+    });
+    await state.childProps.dataProvider({ filters: {}, page: 1, pageSize: 20 });
+    await flush();
+    expect(state.childProps.rowActions[0].visible({ id: 'row-1' })).toBe(false);
   });
 
   it('merges external filters with immutable filters and ignores a late page response', async () => {
@@ -296,5 +339,6 @@ describe('go resource table integration', () => {
         page: 2,
       }),
     );
+    expect(state.evaluateRows).not.toHaveBeenCalled();
   });
 });

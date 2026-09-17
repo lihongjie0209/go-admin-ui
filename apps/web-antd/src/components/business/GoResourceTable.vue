@@ -49,10 +49,24 @@ const deleteCapability = usePageCapability({
   resource: props.authorizationResource,
   action: 'delete',
 });
+const rowAuthorizationActions = computed(() => [
+  ...(props.rowAuthorization ? ['update', 'delete'] : []),
+  ...props.rowActions
+    .filter((action) => action.rowAuthorization)
+    .map((action) =>
+      action.authorization?.resource === props.authorizationResource
+        ? action.authorization.action
+        : '',
+    )
+    .filter(Boolean),
+]);
+const rowAuthorizationIDs = computed(() =>
+  rowAuthorizationActions.value.length > 0 ? rowIds.value : [],
+);
 const rowCapabilities = useRowCapabilities(
   computed(() => props.authorizationResource),
-  ['update', 'delete'],
-  rowIds,
+  rowAuthorizationActions,
+  rowAuthorizationIDs,
 );
 const authorizedRowActions = props.rowActions.map((action) => ({
   action,
@@ -71,7 +85,14 @@ const visibleRowActions = computed(() =>
         () => action.run(row),
       ),
     visible: (row: Record<string, unknown>) =>
-      (capability?.allowed.value ?? true) && (action.visible?.(row) ?? true),
+      (capability?.allowed.value ?? true) &&
+      (!action.rowAuthorization ||
+        (action.authorization?.resource === props.authorizationResource &&
+          rowCapabilities.allowed(
+            String(row.id ?? ''),
+            action.authorization.action,
+          ))) &&
+      (action.visible?.(row) ?? true),
   })),
 );
 const api = createResourceApi<Record<string, unknown> & VersionedRecord>({

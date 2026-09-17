@@ -33,6 +33,7 @@ const contract = {
         deferred: true,
         key: 'grant',
         label: '分配权限',
+        rowAuthorization: true,
         run: async (row: Record<string, unknown>) => {
           role.value = row;
           assignmentOpen.value = true;

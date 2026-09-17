@@ -18,6 +18,8 @@ export interface GridRowAction {
   deferred?: boolean;
   key: string;
   label: string;
+  /** Evaluate this action for the concrete row ID using the table resource. */
+  rowAuthorization?: boolean;
   run: (row: Record<string, unknown>) => Promise<void>;
   successMessage?: false | string;
   visible?: (row: Record<string, unknown>) => boolean;

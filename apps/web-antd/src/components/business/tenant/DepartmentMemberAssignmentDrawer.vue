@@ -188,6 +188,7 @@ onScopeDispose(() => {
       <Input.Search
         v-model:value="keyword"
         allow-clear
+        aria-label="搜索部门成员"
         placeholder="搜索用户名或姓名"
       />
       <Table

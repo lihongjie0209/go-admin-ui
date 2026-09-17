@@ -211,6 +211,7 @@ defineExpose({
       <Space wrap>
         <Button
           v-if="allowCreate && createAction"
+          aria-label="新增"
           type="primary"
           @click="createAction"
         >

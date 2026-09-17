@@ -54,6 +54,7 @@ const contract = {
         deferred: true,
         key: 'assign-role',
         label: '分配角色',
+        rowAuthorization: true,
         run: async (row: Record<string, unknown>) => {
           member.value = row;
           assignmentOpen.value = true;

@@ -400,6 +400,7 @@ defineExpose({ dirty, requestClose, save, values });
           </Button>
           <Button
             v-if="mode !== 'detail'"
+            aria-label="保存"
             type="primary"
             :disabled="!allowed"
             :loading="saving"
