@@ -1,6 +1,6 @@
 import { reactive } from 'vue';
 
-import { requestClient } from '#/api/request';
+import { publicRequestClient } from '#/api/request';
 
 export interface PublicPlatformConfig {
   'platform.logo_url'?: string;
@@ -42,7 +42,7 @@ try {
 
 export async function loadPublicPlatformConfig() {
   try {
-    const records = await requestClient.post<
+    const records = await publicRequestClient.post<
       Array<{ key: string; value: unknown }>
     >(
       '/public/platform-configs/list',
@@ -64,11 +64,10 @@ export async function getPublicPlatformConfig(
   key: string,
   signal?: AbortSignal,
 ) {
-  const record = await requestClient.post<{ key: string; value: unknown }>(
-    '/public/platform-configs/get',
-    { key },
-    { signal },
-  );
+  const record = await publicRequestClient.post<{
+    key: string;
+    value: unknown;
+  }>('/public/platform-configs/get', { key }, { signal });
   publicPlatformConfig[record.key] = record.value;
   persistPublicPlatformConfig();
   return record.value;
