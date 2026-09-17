@@ -1,0 +1,6 @@
+.vben-menu,
+.vben-menu__popup-container {
+  --menu-item-padding-x: 8px;
+  --menu-item-indent: 12px;
+  --menu-title-width: 156px;
+}

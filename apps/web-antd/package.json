@@ -1,0 +1,65 @@
+{
+  "name": "@go-admin/web",
+  "version": "0.1.0",
+  "homepage": "https://github.com/lihongjie0209/go-admin-ui",
+  "bugs": "https://github.com/lihongjie0209/go-admin-ui/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lihongjie0209/go-admin-ui.git",
+    "directory": "apps/web-antd"
+  },
+  "license": "MIT",
+  "author": "go-admin-ui contributors",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm vite build --mode production",
+    "build:analyze": "pnpm vite build --mode analyze",
+    "dev": "pnpm vite --mode development",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit --skipLibCheck"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "dependencies": {
+    "@codemirror/state": "^6.7.4",
+    "@codemirror/view": "^6.43.11",
+    "@file-viewer/vue3-full": "3.0.0",
+    "@iconify-json/carbon": "^1.2.26",
+    "@iconify-json/lucide": "^1.2.129",
+    "@iconify-json/material-symbols": "^1.2.90",
+    "@logicflow/core": "^2.2.5",
+    "@logicflow/extension": "^2.3.1",
+    "@prometheus-io/codemirror-promql": "0.314.0",
+    "@vben/access": "workspace:*",
+    "@vben/common-ui": "workspace:*",
+    "@vben/constants": "workspace:*",
+    "@vben/hooks": "workspace:*",
+    "@vben/icons": "workspace:*",
+    "@vben/layouts": "workspace:*",
+    "@vben/locales": "workspace:*",
+    "@vben/plugins": "workspace:*",
+    "@vben/preferences": "workspace:*",
+    "@vben/request": "workspace:*",
+    "@vben/stores": "workspace:*",
+    "@vben/styles": "workspace:*",
+    "@vben/types": "workspace:*",
+    "@vben/utils": "workspace:*",
+    "@vueuse/core": "catalog:",
+    "ant-design-vue": "catalog:",
+    "codemirror": "^6.0.2",
+    "dayjs": "catalog:",
+    "echarts": "6.1.0",
+    "highlight.js": "^11.12.0",
+    "pinia": "catalog:",
+    "vue": "catalog:",
+    "vue-router": "catalog:",
+    "xlsx-js-style": "^1.2.0",
+    "yaml": "^2.9.0"
+  },
+  "devDependencies": {
+    "@file-viewer/vite-plugin": "3.0.0",
+    "@vitejs/plugin-vue": "catalog:",
+    "@vue/test-utils": "catalog:"
+  }
+}

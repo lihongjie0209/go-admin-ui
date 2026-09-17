@@ -1,0 +1,67 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const api = vi.hoisted(() => ({ post: vi.fn() }));
+
+vi.mock('#/api/request', () => ({ requestClient: api }));
+
+const { openFileDownload, requestFileDownload, uploadFile } =
+  await import('../../src/modules/files/file-actions.ts');
+const { formatBytes } =
+  await import('../../src/modules/files/resource-contracts.ts');
+
+beforeEach(() => {
+  api.post.mockReset();
+});
+
+describe('file management actions', () => {
+  it('uploads a browser File as multipart form data', async () => {
+    const record = { id: 'file-1', original_name: 'report.txt', version: 1 };
+    api.post.mockResolvedValue(record);
+    const file = new File(['hello'], 'report.txt', { type: 'text/plain' });
+
+    await expect(uploadFile(file)).resolves.toEqual(record);
+    expect(api.post).toHaveBeenCalledTimes(1);
+    const [path, body] = api.post.mock.calls[0];
+    expect(path).toBe('/files/upload');
+    expect(body).toBeInstanceOf(FormData);
+    const uploaded = body.get('file');
+    expect(uploaded).toBeInstanceOf(File);
+    expect(uploaded.name).toBe('report.txt');
+    await expect(uploaded.text()).resolves.toBe('hello');
+  });
+
+  it('requests a short-lived download without persisting the signed URL', async () => {
+    const download = {
+      expires_at: '2026-09-18T01:00:00+08:00',
+      file: { original_name: 'report.txt' },
+      url: 'https://storage.example/signed',
+    };
+    api.post.mockResolvedValue(download);
+
+    await expect(requestFileDownload('file-1')).resolves.toEqual(download);
+    expect(api.post).toHaveBeenCalledWith('/files/download', { id: 'file-1' });
+  });
+
+  it('opens a no-opener browser download and removes the transient link', () => {
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {});
+
+    openFileDownload({
+      expires_at: '2026-09-18T01:00:00+08:00',
+      file: { original_name: 'report.txt' },
+      url: 'https://storage.example/signed',
+    });
+
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('a[href*="storage.example"]')).toBeNull();
+    click.mockRestore();
+  });
+
+  it('formats file sizes for table and detail presentation', () => {
+    expect(formatBytes(512)).toBe('512 B');
+    expect(formatBytes(1536)).toBe('1.50 KB');
+    expect(formatBytes(10 * 1024 * 1024)).toBe('10.0 MB');
+    expect(formatBytes('invalid')).toBe('—');
+  });
+});

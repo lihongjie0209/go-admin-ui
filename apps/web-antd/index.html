@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="renderer" content="webkit" />
+    <meta name="description" content="Go 微服务平台管理控制台" />
+    <meta name="keywords" content="Go Admin 微服务平台" />
+    <meta name="author" content="Go Admin" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=0"
+    />
+    <!-- 构建期提供安全默认值，启动后由公开平台配置覆盖。 -->
+    <title>%VITE_APP_TITLE%</title>
+    <link rel="icon" href="/favicon.ico" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      // Loading 在 Vue 启动前由构建插件注入，优先使用上次成功读取的公开平台配置。
+      try {
+        const config = JSON.parse(
+          localStorage.getItem('go-admin.public-platform-config') || '{}',
+        );
+        const name = String(config['platform.name'] || '').trim();
+        const title = document.querySelector('#__app-loading__ .title');
+        if (name && title) title.textContent = name;
+        if (name) document.title = name;
+      } catch {
+        localStorage.removeItem('go-admin.public-platform-config');
+      }
+    </script>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
