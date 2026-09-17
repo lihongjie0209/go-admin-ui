@@ -18,6 +18,11 @@ const detailOpen = ref(false);
 const detailRecordID = ref('');
 const editingRecord = ref<null | Record<string, unknown>>(null);
 const editorMode = computed(() => (editingRecord.value ? 'edit' : 'create'));
+const hasEditor = computed(
+  () =>
+    props.contract.table.allowCreate !== false ||
+    props.contract.table.allowEdit !== false,
+);
 const capabilities = computed(() =>
   resourcePageCapabilities(
     props.contract.authorizationResource,
@@ -120,6 +125,7 @@ defineExpose({
       :table="table"
     />
     <GoResourceEditor
+      v-if="hasEditor"
       v-model:open="editorOpen"
       :authorization-resource="contract.authorizationResource"
       :fields="contract.editorFields"

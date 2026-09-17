@@ -195,6 +195,55 @@ describe('go resource table integration', () => {
     expect(root.querySelector('[data-create]').textContent).toBe('true');
   });
 
+  it('does not register or evaluate disabled mutation capabilities', async () => {
+    root = document.createElement('div');
+    document.body.append(root);
+    app = createApp({
+      setup: () => () =>
+        h(
+          CapabilityProvider,
+          {
+            capabilities: [
+              {
+                action: 'list',
+                key: 'identity.session:list',
+                resource: 'identity.session',
+              },
+            ],
+          },
+          {
+            default: () =>
+              h(ResourceTable, {
+                allowCreate: false,
+                allowDelete: false,
+                allowEdit: false,
+                authorizationResource: 'identity.session',
+                columns: [{ field: 'status', title: '状态' }],
+                endpoints: {
+                  create: '/auth/sessions/page',
+                  delete: '/auth/sessions/revoke',
+                  get: '/auth/sessions/page',
+                  page: '/auth/sessions/page',
+                  update: '/auth/sessions/revoke',
+                },
+              }),
+          },
+        ),
+    });
+    app.mount(root);
+    await flush();
+
+    expect(state.evaluate).toHaveBeenCalledTimes(1);
+    expect(state.evaluate).toHaveBeenCalledWith([
+      {
+        action: 'list',
+        key: 'identity.session:list',
+        resource: 'identity.session',
+      },
+    ]);
+    expect(state.evaluateRows).not.toHaveBeenCalled();
+  });
+
   it('forwards pagination filters and optimistic versions through the resource adapter', async () => {
     await mount();
 

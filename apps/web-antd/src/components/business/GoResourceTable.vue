@@ -29,28 +29,36 @@ const runFrontendAction = useFrontendAction();
 const rowIds = ref<string[]>([]);
 let pageGeneration = 0;
 let pageController: AbortController | undefined;
-const createCapability = usePageCapability({
-  key: `${props.authorizationResource}:create`,
-  resource: props.authorizationResource,
-  action: 'create',
-});
+const deniedCapability = { allowed: computed(() => false) };
+const createCapability = props.allowCreate
+  ? usePageCapability({
+      key: `${props.authorizationResource}:create`,
+      resource: props.authorizationResource,
+      action: 'create',
+    })
+  : deniedCapability;
 const listCapability = usePageCapability({
   key: `${props.authorizationResource}:list`,
   resource: props.authorizationResource,
   action: 'list',
 });
-const updateCapability = usePageCapability({
-  key: `${props.authorizationResource}:update`,
-  resource: props.authorizationResource,
-  action: 'update',
-});
-const deleteCapability = usePageCapability({
-  key: `${props.authorizationResource}:delete`,
-  resource: props.authorizationResource,
-  action: 'delete',
-});
+const updateCapability = props.allowEdit
+  ? usePageCapability({
+      key: `${props.authorizationResource}:update`,
+      resource: props.authorizationResource,
+      action: 'update',
+    })
+  : deniedCapability;
+const deleteCapability = props.allowDelete
+  ? usePageCapability({
+      key: `${props.authorizationResource}:delete`,
+      resource: props.authorizationResource,
+      action: 'delete',
+    })
+  : deniedCapability;
 const rowAuthorizationActions = computed(() => [
-  ...(props.rowAuthorization ? ['update', 'delete'] : []),
+  ...(props.rowAuthorization && props.allowEdit ? ['update'] : []),
+  ...(props.rowAuthorization && props.allowDelete ? ['delete'] : []),
   ...props.rowActions
     .filter((action) => action.rowAuthorization)
     .map((action) =>

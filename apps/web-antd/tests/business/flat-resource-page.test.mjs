@@ -198,6 +198,29 @@ describe('flat resource page template', () => {
     });
   });
 
+  it('does not mount an editor for a completely read-only resource', async () => {
+    await mount({
+      ...contract,
+      table: {
+        ...contract.table,
+        allowCreate: false,
+        allowDelete: false,
+        allowEdit: false,
+      },
+    });
+
+    expect(state.editorProps).toBeNull();
+    expect(state.capabilities).not.toContainEqual(
+      expect.objectContaining({ action: 'create' }),
+    );
+    expect(state.capabilities).not.toContainEqual(
+      expect.objectContaining({ action: 'update' }),
+    );
+    expect(state.capabilities).not.toContainEqual(
+      expect.objectContaining({ action: 'delete' }),
+    );
+  });
+
   it('opens detail through the standard row action', async () => {
     await mount();
     const detail = state.tableProps.rowActions.find(
