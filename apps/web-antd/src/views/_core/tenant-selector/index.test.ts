@@ -70,10 +70,11 @@ describe('tenantSelectorPage', () => {
       revision: '1',
     });
 
-    mount(TenantSelectorPage);
+    const wrapper = mount(TenantSelectorPage);
     await flushPromises();
 
     expect(loadTenants).not.toHaveBeenCalled();
+    expect(wrapper.text()).toContain('当前账号无权查看可用租户');
   });
 
   it('loads the list but hides tenant actions when switch is denied', async () => {

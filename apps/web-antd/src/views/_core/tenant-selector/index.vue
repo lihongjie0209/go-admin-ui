@@ -97,7 +97,12 @@ onScopeDispose(() => controller.abort());
   <Page>
     <GoCapabilityProvider :capabilities="[listCapability, switchCapability]">
       <GoAuthorizedLoader :authorization="listCapability" :load="load" />
-      <GoAccess action="list" resource="tenant.selection">
+      <GoAccess
+        action="list"
+        denied="message"
+        denied-message="当前账号无权查看可用租户"
+        resource="tenant.selection"
+      >
         <main
           class="mx-auto flex min-h-[calc(100vh-96px)] max-w-5xl flex-col px-6 py-10"
         >

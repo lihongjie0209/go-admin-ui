@@ -78,10 +78,11 @@ describe('applicationSelectorPage', () => {
       revision: '1',
     });
 
-    mount(ApplicationSelectorPage);
+    const wrapper = mount(ApplicationSelectorPage);
     await flushPromises();
 
     expect(loadApplications).not.toHaveBeenCalled();
+    expect(wrapper.text()).toContain('当前账号无权查看可用应用');
   });
 
   it('loads applications independently and hides entries without navigation access', async () => {

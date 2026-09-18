@@ -236,7 +236,12 @@ async function loadUsage() {
         :authorization="currentNavigationReadCapability"
         :load="loadUsage"
       />
-      <GoAccess action="list" resource="application.current">
+      <GoAccess
+        action="list"
+        denied="message"
+        denied-message="当前账号无权查看可用应用"
+        resource="application.current"
+      >
         <div class="mx-auto max-w-[1440px] px-6 py-8">
           <div class="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
