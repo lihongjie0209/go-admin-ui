@@ -3,6 +3,8 @@ import { ref } from 'vue';
 
 import { Button, Card, InputPassword, message } from 'ant-design-vue';
 
+import GoAccess from '#/components/foundation/GoAccess.vue';
+import GoCapabilityProvider from '#/components/foundation/GoCapabilityProvider.vue';
 import { useFrontendAction } from '#/composables/use-frontend-action';
 import { changeOwnPassword } from '#/modules/identity/user-security-actions';
 import { useAuthStore } from '#/store';
@@ -13,6 +15,11 @@ const confirmation = ref('');
 const submitting = ref(false);
 const auth = useAuthStore();
 const runFrontendAction = useFrontendAction();
+const changePasswordCapability = {
+  action: 'change-password',
+  key: 'identity.credential:change-password',
+  resource: 'identity.credential',
+};
 async function submit() {
   if (submitting.value) return;
   if (!oldPassword.value) return void message.warning('请输入当前密码');
@@ -35,33 +42,42 @@ async function submit() {
 }
 </script>
 <template>
-  <Card title="修改密码" class="w-[420px]">
-    <div class="mb-4 text-sm text-gray-500">
-      管理员已重置密码或密码已经过期。新密码不能与近期密码重复。
-    </div>
-    <InputPassword
-      v-model:value="oldPassword"
-      aria-label="当前密码"
-      class="mb-3"
-      placeholder="当前密码"
-      @press-enter="submit"
-    />
-    <InputPassword
-      v-model:value="newPassword"
-      aria-label="新密码"
-      class="mb-3"
-      placeholder="新密码（至少 12 位，包含大小写、数字和符号）"
-      @press-enter="submit"
-    />
-    <InputPassword
-      v-model:value="confirmation"
-      aria-label="确认新密码"
-      class="mb-4"
-      placeholder="再次输入新密码"
-      @press-enter="submit"
-    />
-    <Button type="primary" block :loading="submitting" @click="submit">
-      修改密码并重新登录
-    </Button>
-  </Card>
+  <GoCapabilityProvider :capabilities="[changePasswordCapability]">
+    <GoAccess
+      action="change-password"
+      denied="message"
+      denied-message="当前账号没有修改密码的权限"
+      resource="identity.credential"
+    >
+      <Card class="w-[420px]" title="修改密码">
+        <div class="mb-4 text-sm text-gray-500">
+          管理员已重置密码或密码已经过期。新密码不能与近期密码重复。
+        </div>
+        <InputPassword
+          v-model:value="oldPassword"
+          aria-label="当前密码"
+          class="mb-3"
+          placeholder="当前密码"
+          @press-enter="submit"
+        />
+        <InputPassword
+          v-model:value="newPassword"
+          aria-label="新密码"
+          class="mb-3"
+          placeholder="新密码（至少 12 位，包含大小写、数字和符号）"
+          @press-enter="submit"
+        />
+        <InputPassword
+          v-model:value="confirmation"
+          aria-label="确认新密码"
+          class="mb-4"
+          placeholder="再次输入新密码"
+          @press-enter="submit"
+        />
+        <Button block :loading="submitting" type="primary" @click="submit">
+          修改密码并重新登录
+        </Button>
+      </Card>
+    </GoAccess>
+  </GoCapabilityProvider>
 </template>

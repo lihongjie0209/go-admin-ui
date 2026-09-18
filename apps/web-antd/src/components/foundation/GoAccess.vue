@@ -6,10 +6,11 @@ import { usePageCapability } from '#/composables/use-page-capabilities';
 const props = withDefaults(
   defineProps<{
     action: string;
-    denied?: 'disable' | 'hide';
+    denied?: 'disable' | 'hide' | 'message';
+    deniedMessage?: string;
     resource: string;
   }>(),
-  { denied: 'hide' },
+  { denied: 'hide', deniedMessage: '当前账号无权执行此操作' },
 );
 
 const capability = usePageCapability({
@@ -35,4 +36,10 @@ const capability = usePageCapability({
   >
     <slot name="disabled"></slot>
   </span>
+  <Alert
+    v-else-if="denied === 'message'"
+    :message="deniedMessage"
+    show-icon
+    type="warning"
+  />
 </template>
