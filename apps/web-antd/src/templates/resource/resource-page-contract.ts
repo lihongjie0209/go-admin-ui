@@ -27,12 +27,14 @@ export interface TreeResourcePageContract {
   canDeleteNode?: (node: NormalizedTreeRecord) => boolean;
   canEditNode?: (node: NormalizedTreeRecord) => boolean;
   capabilities?: CapabilityRequest[];
+  createAuthorizations?: CapabilityRequest[];
   editorFields: ResourceEditorField[];
   editorInitialValues?: Record<string, unknown>;
   endpoints: TreeResourceEndpoints;
   fixedFilters?: Record<string, unknown>;
   rowAuthorization?: boolean;
   rowAuthorizationActions?: string[];
+  updateAuthorizations?: CapabilityRequest[];
 }
 
 export function mutationCapabilities(

@@ -23,10 +23,11 @@ const initialValues = computed(() => ({
   parent_id: parent.value?.id ?? null,
 }));
 const capabilities = computed(() =>
-  resourcePageCapabilities(
-    props.contract.authorizationResource,
-    props.contract.capabilities,
-  ),
+  resourcePageCapabilities(props.contract.authorizationResource, [
+    ...(props.contract.capabilities ?? []),
+    ...(props.contract.createAuthorizations ?? []),
+    ...(props.contract.updateAuthorizations ?? []),
+  ]),
 );
 
 function openCreate(parentNode: NormalizedTreeRecord | null) {
@@ -61,10 +62,12 @@ async function submit(
       :authorization-resource="contract.authorizationResource"
       :can-delete-node="contract.canDeleteNode"
       :can-edit-node="contract.canEditNode"
+      :create-authorizations="contract.createAuthorizations"
       :endpoints="contract.endpoints"
       :fixed-filters="contract.fixedFilters"
       :row-authorization="contract.rowAuthorization"
       :row-authorization-actions="contract.rowAuthorizationActions"
+      :update-authorizations="contract.updateAuthorizations"
       @create="openCreate"
       @edit="openEdit"
     >

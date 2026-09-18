@@ -113,6 +113,12 @@ const capabilities = ['list', 'create', 'update', 'delete'].map((action) => ({
   key: `tenant.department:${action}`,
   resource: 'tenant.department',
 }));
+const editorDependency = {
+  action: 'list',
+  key: 'pbac.resource-action:list',
+  resource: 'pbac.resource-action',
+};
+capabilities.push(editorDependency);
 
 let app;
 let root;
@@ -139,10 +145,12 @@ async function mount() {
           default: () =>
             h(TreeResource, {
               authorizationResource: 'tenant.department',
+              createAuthorizations: [editorDependency],
               endpoints,
               fixedFilters: { tenant_id: 'tenant-1' },
               onSelect: selected,
               ref: (value) => (treeResource = value),
+              updateAuthorizations: [editorDependency],
             }),
         },
       ),
@@ -210,6 +218,25 @@ describe('tree resource integration', () => {
     expect(selected).toHaveBeenLastCalledWith(
       expect.objectContaining({ id: 'leaf', version: 2 }),
     );
+  });
+
+  it('hides create and edit entry points when editor dependencies are denied', async () => {
+    state.evaluate.mockResolvedValueOnce({
+      items: capabilities.map(({ key }) => ({
+        allowed: key !== editorDependency.key,
+        key,
+      })),
+    });
+    await mount();
+    root.querySelector('[data-node="leaf"]').click();
+    await flush();
+
+    const labels = [...root.querySelectorAll('button')].map((button) =>
+      button.textContent.trim(),
+    );
+    expect(labels).not.toContain('新增根节点');
+    expect(labels).not.toContain('新增子节点');
+    expect(labels).not.toContain('编辑');
   });
 
   it('deletes only the selected leaf with its optimistic version and reloads', async () => {

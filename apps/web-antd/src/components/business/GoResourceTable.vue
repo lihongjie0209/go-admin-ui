@@ -37,6 +37,9 @@ const createCapability = props.allowCreate
       action: 'create',
     })
   : deniedCapability;
+const createAdditionalCapabilities = (props.createAuthorizations ?? []).map(
+  (authorization) => usePageCapability(authorization),
+);
 const listCapability = usePageCapability({
   key: `${props.authorizationResource}:list`,
   resource: props.authorizationResource,
@@ -49,6 +52,9 @@ const updateCapability = props.allowEdit
       action: 'update',
     })
   : deniedCapability;
+const updateAdditionalCapabilities = (props.updateAuthorizations ?? []).map(
+  (authorization) => usePageCapability(authorization),
+);
 const deleteCapability = props.allowDelete
   ? usePageCapability({
       key: `${props.authorizationResource}:delete`,
@@ -187,7 +193,13 @@ defineExpose({
 <template>
   <GoDataGrid
     ref="table"
-    :allow-create="allowCreate && createCapability.allowed.value"
+    :allow-create="
+      allowCreate &&
+      createCapability.allowed.value &&
+      createAdditionalCapabilities.every(
+        (capability) => capability.allowed.value,
+      )
+    "
     :batch-actions="batchActions"
     :columns="columns"
     :create-action="createAction"
@@ -195,6 +207,9 @@ defineExpose({
       (row) =>
         allowEdit &&
         updateCapability.allowed.value &&
+        updateAdditionalCapabilities.every(
+          (capability) => capability.allowed.value,
+        ) &&
         (!rowAuthorization || rowCapabilities.allowed(String(row.id), 'update'))
     "
     :can-remove="

@@ -4,7 +4,12 @@ import type {
   GridRowAction,
 } from './go-data-grid-types';
 
-import type { ResourceEndpoints, Sort, VersionedRecord } from '#/api/go';
+import type {
+  CapabilityRequest,
+  ResourceEndpoints,
+  Sort,
+  VersionedRecord,
+} from '#/api/go';
 
 export interface GoResourceQuery {
   filters: Record<string, unknown>;
@@ -18,6 +23,7 @@ export interface GoResourceTableProps {
   authorizationResource: string;
   batchActions?: GridBatchAction[];
   columns: GridColumn[];
+  createAuthorizations?: CapabilityRequest[];
   createAction?: () => void;
   defaultSort?: Sort[];
   endpoints: ResourceEndpoints;
@@ -29,6 +35,7 @@ export interface GoResourceTableProps {
     values: Record<string, unknown>,
     current: Record<string, unknown> & VersionedRecord,
   ) => Record<string, unknown> & VersionedRecord;
+  updateAuthorizations?: CapabilityRequest[];
   pageSize?: number;
   query?: GoResourceQuery;
   rowActions?: GridRowAction[];

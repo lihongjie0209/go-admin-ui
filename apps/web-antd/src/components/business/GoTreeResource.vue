@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { VersionedRecord } from '#/api/go';
+import type { CapabilityRequest, VersionedRecord } from '#/api/go';
 import type {
   TreeResourceContract,
   TreeResourceEndpoints,
@@ -40,6 +40,7 @@ const props = withDefaults(
     authorizationResource: string;
     canDeleteNode?: (node: NormalizedTreeRecord) => boolean;
     canEditNode?: (node: NormalizedTreeRecord) => boolean;
+    createAuthorizations?: CapabilityRequest[];
     endpoints: TreeResourceEndpoints;
     fixedFilters?: Record<string, unknown>;
     mapTreeRequest?: TreeResourceContract<
@@ -47,14 +48,17 @@ const props = withDefaults(
     >['toTreeRequest'];
     rowAuthorization?: boolean;
     rowAuthorizationActions?: string[];
+    updateAuthorizations?: CapabilityRequest[];
   }>(),
   {
     fixedFilters: () => ({}),
     canDeleteNode: () => true,
     canEditNode: () => true,
+    createAuthorizations: () => [],
     mapTreeRequest: undefined,
     rowAuthorization: false,
     rowAuthorizationActions: () => ['update', 'delete'],
+    updateAuthorizations: () => [],
   },
 );
 
@@ -82,6 +86,9 @@ const createCapability = usePageCapability({
   key: `${props.authorizationResource}:create`,
   resource: props.authorizationResource,
 });
+const createAdditionalCapabilities = props.createAuthorizations.map(
+  (authorization) => usePageCapability(authorization),
+);
 const listCapability = usePageCapability({
   action: 'list',
   key: `${props.authorizationResource}:list`,
@@ -92,6 +99,9 @@ const updateCapability = usePageCapability({
   key: `${props.authorizationResource}:update`,
   resource: props.authorizationResource,
 });
+const updateAdditionalCapabilities = props.updateAuthorizations.map(
+  (authorization) => usePageCapability(authorization),
+);
 const deleteCapability = usePageCapability({
   action: 'delete',
   key: `${props.authorizationResource}:delete`,
@@ -128,6 +138,9 @@ const canUpdateSelected = computed(() => {
     node !== null &&
     props.canEditNode(node) &&
     updateCapability.allowed.value &&
+    updateAdditionalCapabilities.every(
+      (capability) => capability.allowed.value,
+    ) &&
     (!props.rowAuthorization ||
       rowCapabilities.allowed(selectedID.value, 'update'))
   );
@@ -270,14 +283,25 @@ defineExpose({ createNode, deleteNode, load, updateNode });
         placeholder="搜索名称或编码"
       />
       <Button
-        v-if="createCapability.allowed.value"
+        v-if="
+          createCapability.allowed.value &&
+          createAdditionalCapabilities.every(
+            (capability) => capability.allowed.value,
+          )
+        "
         type="primary"
         @click="emit('create', null)"
       >
         新增根节点
       </Button>
       <Button
-        v-if="createCapability.allowed.value && selected"
+        v-if="
+          createCapability.allowed.value &&
+          createAdditionalCapabilities.every(
+            (capability) => capability.allowed.value,
+          ) &&
+          selected
+        "
         @click="emit('create', selected)"
       >
         新增子节点

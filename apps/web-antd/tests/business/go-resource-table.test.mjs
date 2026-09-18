@@ -89,11 +89,18 @@ const capabilities = ['list', 'create', 'update', 'delete', 'assign-role'].map(
     resource: 'tenant.member',
   }),
 );
-capabilities.push({
-  action: 'list',
-  key: 'tenant.role:list',
-  resource: 'tenant.role',
-});
+capabilities.push(
+  {
+    action: 'list',
+    key: 'tenant.role:list',
+    resource: 'tenant.role',
+  },
+  {
+    action: 'read',
+    key: 'tenant.authorization:read',
+    resource: 'tenant.authorization',
+  },
+);
 
 let app;
 let resourceTable;
@@ -119,6 +126,13 @@ async function mount() {
             h(ResourceTable, {
               authorizationResource: 'tenant.member',
               columns: [{ field: 'name', title: '名称' }],
+              createAuthorizations: [
+                {
+                  action: 'read',
+                  key: 'tenant.authorization:read',
+                  resource: 'tenant.authorization',
+                },
+              ],
               endpoints: {
                 create: '/tenant/members/create',
                 delete: '/tenant/members/delete',
@@ -254,6 +268,19 @@ describe('go resource table integration', () => {
       },
     ]);
     expect(state.evaluateRows).not.toHaveBeenCalled();
+  });
+
+  it('hides create when an editor option dependency is not authorized', async () => {
+    state.evaluate.mockResolvedValueOnce({
+      items: capabilities.map(({ key }) => ({
+        allowed: key !== 'tenant.authorization:read',
+        key,
+      })),
+      revision: 'policy-2',
+    });
+    await mount();
+
+    expect(root.querySelector('[data-create]').textContent).toBe('false');
   });
 
   it('forwards pagination filters and optimistic versions through the resource adapter', async () => {

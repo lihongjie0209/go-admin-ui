@@ -274,6 +274,13 @@ export const tenantRolePageContract: FlatResourcePageContract = {
       },
       actionColumn,
     ],
+    createAuthorizations: [
+      {
+        action: 'read',
+        key: 'tenant.authorization:read',
+        resource: 'tenant.authorization',
+      },
+    ],
     endpoints: {
       create: '/tenant-roles/create',
       delete: '/tenant-roles/delete',

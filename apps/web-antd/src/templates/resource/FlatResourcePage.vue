@@ -55,6 +55,8 @@ const capabilities = computed(() =>
             },
           ]),
       ...(props.contract.capabilities ?? []),
+      ...(props.contract.table.createAuthorizations ?? []),
+      ...(props.contract.table.updateAuthorizations ?? []),
     ],
     false,
   ),

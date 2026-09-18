@@ -23,6 +23,12 @@ const actionColumn = {
   width: 190,
 };
 
+const pbacResourceListCapability = {
+  action: 'list',
+  key: 'pbac.resource-action:list',
+  resource: 'pbac.resource-action',
+};
+
 const auditDetailFields = [
   { field: 'created_at', label: '创建时间', presentation: 'datetime' as const },
   { field: 'created_by_name', label: '创建人' },
@@ -1030,6 +1036,8 @@ export function navigationTreeContract(
     };
   return {
     authorizationResource: 'navigation',
+    capabilities: [pbacResourceListCapability],
+    createAuthorizations: [pbacResourceListCapability],
     editorFields: [
       {
         component: 'hidden',
@@ -1131,6 +1139,7 @@ export function navigationTreeContract(
       update: '/navigations/update',
     },
     fixedFilters: { application_id: applicationID },
+    updateAuthorizations: [pbacResourceListCapability],
   };
 }
 
@@ -1138,6 +1147,8 @@ export const permissionTreeContract: TreeResourcePageContract = {
   authorizationResource: 'permission.definition',
   canDeleteNode: (node) => node.is_system !== true,
   canEditNode: (node) => node.is_system !== true,
+  capabilities: [pbacResourceListCapability],
+  createAuthorizations: [pbacResourceListCapability],
   editorFields: [
     { component: 'hidden', field: 'parent_id', label: '父权限 ID' },
     {
@@ -1208,4 +1219,5 @@ export const permissionTreeContract: TreeResourcePageContract = {
     tree: '/permissions/tree',
     update: '/permissions/update',
   },
+  updateAuthorizations: [pbacResourceListCapability],
 };
