@@ -36,7 +36,12 @@ const capabilities = [
     description="维护账号展示信息和联系方式。用户名与账号状态由平台统一管理。"
   >
     <GoCapabilityProvider :capabilities="capabilities">
-      <GoAccess action="read" resource="identity.profile">
+      <GoAccess
+        action="read"
+        denied="message"
+        denied-message="当前账号无权查看个人资料"
+        resource="identity.profile"
+      >
         <ProfileContent />
       </GoAccess>
     </GoCapabilityProvider>

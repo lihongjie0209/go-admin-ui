@@ -7,6 +7,7 @@ import { computed, ref } from 'vue';
 
 import GoResourceEditor from '#/components/business/GoResourceEditor.vue';
 import GoTreeResource from '#/components/business/GoTreeResource.vue';
+import GoAccess from '#/components/foundation/GoAccess.vue';
 import GoCapabilityProvider from '#/components/foundation/GoCapabilityProvider.vue';
 
 import { resourcePageCapabilities } from './resource-page-contract';
@@ -57,35 +58,42 @@ async function submit(
 
 <template>
   <GoCapabilityProvider :capabilities="capabilities">
-    <GoTreeResource
-      ref="tree"
-      :authorization-resource="contract.authorizationResource"
-      :can-delete-node="contract.canDeleteNode"
-      :can-edit-node="contract.canEditNode"
-      :create-authorizations="contract.createAuthorizations"
-      :endpoints="contract.endpoints"
-      :fixed-filters="contract.fixedFilters"
-      :row-authorization="contract.rowAuthorization"
-      :row-authorization-actions="contract.rowAuthorizationActions"
-      :update-authorizations="contract.updateAuthorizations"
-      @create="openCreate"
-      @edit="openEdit"
+    <GoAccess
+      action="list"
+      denied="message"
+      denied-message="当前账号无权查看此资源树"
+      :resource="contract.authorizationResource"
     >
-      <template #toolbar="slotProps">
-        <slot name="toolbar" v-bind="slotProps"></slot>
-      </template>
-      <template #node="slotProps">
-        <slot name="node" v-bind="slotProps">{{ slotProps.node.name }}</slot>
-      </template>
-    </GoTreeResource>
-    <GoResourceEditor
-      v-model:open="editorOpen"
-      :authorization-resource="contract.authorizationResource"
-      :fields="contract.editorFields"
-      :initial-values="initialValues"
-      :mode="editorMode"
-      :record="editingNode"
-      :submit="submit"
-    />
+      <GoTreeResource
+        ref="tree"
+        :authorization-resource="contract.authorizationResource"
+        :can-delete-node="contract.canDeleteNode"
+        :can-edit-node="contract.canEditNode"
+        :create-authorizations="contract.createAuthorizations"
+        :endpoints="contract.endpoints"
+        :fixed-filters="contract.fixedFilters"
+        :row-authorization="contract.rowAuthorization"
+        :row-authorization-actions="contract.rowAuthorizationActions"
+        :update-authorizations="contract.updateAuthorizations"
+        @create="openCreate"
+        @edit="openEdit"
+      >
+        <template #toolbar="slotProps">
+          <slot name="toolbar" v-bind="slotProps"></slot>
+        </template>
+        <template #node="slotProps">
+          <slot name="node" v-bind="slotProps">{{ slotProps.node.name }}</slot>
+        </template>
+      </GoTreeResource>
+      <GoResourceEditor
+        v-model:open="editorOpen"
+        :authorization-resource="contract.authorizationResource"
+        :fields="contract.editorFields"
+        :initial-values="initialValues"
+        :mode="editorMode"
+        :record="editingNode"
+        :submit="submit"
+      />
+    </GoAccess>
   </GoCapabilityProvider>
 </template>

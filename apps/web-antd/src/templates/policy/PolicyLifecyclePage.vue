@@ -6,6 +6,7 @@ import { computed } from 'vue';
 
 import { Page } from '@vben/common-ui';
 
+import GoAccess from '#/components/foundation/GoAccess.vue';
 import GoCapabilityProvider from '#/components/foundation/GoCapabilityProvider.vue';
 import { policyAuthorizationResource } from '#/modules/policy/lifecycle-api';
 
@@ -38,7 +39,14 @@ const capabilities = computed<CapabilityRequest[]>(() => {
 <template>
   <Page :description="description" :title="title">
     <GoCapabilityProvider :capabilities="capabilities">
-      <PolicyLifecycleWorkspace :kind="kind" />
+      <GoAccess
+        action="list"
+        denied="message"
+        denied-message="当前账号无权查看此策略库"
+        :resource="policyAuthorizationResource(kind)"
+      >
+        <PolicyLifecycleWorkspace :kind="kind" />
+      </GoAccess>
     </GoCapabilityProvider>
   </Page>
 </template>

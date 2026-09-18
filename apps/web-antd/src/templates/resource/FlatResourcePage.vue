@@ -6,6 +6,7 @@ import { computed, ref } from 'vue';
 import GoResourceDetail from '#/components/business/GoResourceDetail.vue';
 import GoResourceEditor from '#/components/business/GoResourceEditor.vue';
 import GoResourceWorkspace from '#/components/business/GoResourceWorkspace.vue';
+import GoAccess from '#/components/foundation/GoAccess.vue';
 import GoCapabilityProvider from '#/components/foundation/GoCapabilityProvider.vue';
 
 import { resourcePageCapabilities } from './resource-page-contract';
@@ -119,30 +120,37 @@ defineExpose({
 
 <template>
   <GoCapabilityProvider :capabilities="capabilities">
-    <slot name="toolbar"></slot>
-    <GoResourceWorkspace
-      ref="workspace"
-      :initial-query-values="contract.initialQueryValues"
-      :query-fields="contract.queryFields"
-      :table="table"
-    />
-    <GoResourceEditor
-      v-if="hasEditor"
-      v-model:open="editorOpen"
-      :authorization-resource="contract.authorizationResource"
-      :fields="contract.editorFields"
-      :initial-values="contract.editorInitialValues"
-      :mode="editorMode"
-      :record="editingRecord"
-      :submit="submit"
-      @saved="reloadAfterSave"
-    />
-    <GoResourceDetail
-      v-model:open="detailOpen"
-      :authorization-resource="contract.authorizationResource"
-      :endpoints="contract.table.endpoints"
-      :fields="contract.detailFields"
-      :record-id="detailRecordID"
-    />
+    <GoAccess
+      action="list"
+      denied="message"
+      denied-message="当前账号无权查看此资源列表"
+      :resource="contract.authorizationResource"
+    >
+      <slot name="toolbar"></slot>
+      <GoResourceWorkspace
+        ref="workspace"
+        :initial-query-values="contract.initialQueryValues"
+        :query-fields="contract.queryFields"
+        :table="table"
+      />
+      <GoResourceEditor
+        v-if="hasEditor"
+        v-model:open="editorOpen"
+        :authorization-resource="contract.authorizationResource"
+        :fields="contract.editorFields"
+        :initial-values="contract.editorInitialValues"
+        :mode="editorMode"
+        :record="editingRecord"
+        :submit="submit"
+        @saved="reloadAfterSave"
+      />
+      <GoResourceDetail
+        v-model:open="detailOpen"
+        :authorization-resource="contract.authorizationResource"
+        :endpoints="contract.table.endpoints"
+        :fields="contract.detailFields"
+        :record-id="detailRecordID"
+      />
+    </GoAccess>
   </GoCapabilityProvider>
 </template>

@@ -7,6 +7,7 @@ import { Page } from '@vben/common-ui';
 
 import GoAuthorizedActionButton from '#/components/business/GoAuthorizedActionButton.vue';
 import GoResourceWorkspace from '#/components/business/GoResourceWorkspace.vue';
+import GoAccess from '#/components/foundation/GoAccess.vue';
 import GoCapabilityProvider from '#/components/foundation/GoCapabilityProvider.vue';
 import { sessionStatusOptions } from '#/modules/identity/resource-contracts';
 import {
@@ -123,24 +124,31 @@ function reload() {
     <GoCapabilityProvider
       :capabilities="[listCapability, revokeCapability, logoutCapability]"
     >
-      <div class="flex min-h-0 flex-1 flex-col gap-4">
-        <div class="flex justify-end">
-          <GoAuthorizedActionButton
-            :authorization="logoutCapability"
-            confirm="这会撤销当前账号的全部登录会话，确定继续吗？"
-            danger
-            label="退出全部设备"
-            :run="logoutAllSessions"
-            success-message="全部会话已撤销"
-            @completed="reload"
+      <GoAccess
+        action="list"
+        denied="message"
+        denied-message="当前账号无权查看登录会话"
+        resource="identity.session"
+      >
+        <div class="flex min-h-0 flex-1 flex-col gap-4">
+          <div class="flex justify-end">
+            <GoAuthorizedActionButton
+              :authorization="logoutCapability"
+              confirm="这会撤销当前账号的全部登录会话，确定继续吗？"
+              danger
+              label="退出全部设备"
+              :run="logoutAllSessions"
+              success-message="全部会话已撤销"
+              @completed="reload"
+            />
+          </div>
+          <GoResourceWorkspace
+            ref="workspace"
+            :query-fields="queryFields"
+            :table="table"
           />
         </div>
-        <GoResourceWorkspace
-          ref="workspace"
-          :query-fields="queryFields"
-          :table="table"
-        />
-      </div>
+      </GoAccess>
     </GoCapabilityProvider>
   </Page>
 </template>
