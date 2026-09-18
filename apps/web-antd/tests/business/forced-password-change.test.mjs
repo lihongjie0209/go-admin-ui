@@ -19,6 +19,22 @@ vi.mock('../../src/api/go', async (loadOriginal) => ({
 }));
 vi.mock('#/api/request', () => ({ requestClient: { post: api.invoke } }));
 vi.mock('#/store', () => ({ useAuthStore: () => ({ logout: api.logout }) }));
+vi.mock('../../src/components/foundation/GoCapabilityProvider.vue', () => ({
+  default: defineComponent({
+    setup:
+      (_, { slots }) =>
+      () =>
+        slots.default?.(),
+  }),
+}));
+vi.mock('../../src/components/foundation/GoAccess.vue', () => ({
+  default: defineComponent({
+    setup:
+      (_, { slots }) =>
+      () =>
+        slots.default?.(),
+  }),
+}));
 vi.mock('ant-design-vue', () => {
   const Field = defineComponent({
     props: ['value'],

@@ -30,6 +30,18 @@ vi.mock(
   },
 );
 
+vi.mock('../../src/components/foundation/GoAccess.vue', async () => {
+  const { defineComponent } = await import('vue');
+  return {
+    default: defineComponent({
+      setup:
+        (_, { slots }) =>
+        () =>
+          slots.default?.(),
+    }),
+  };
+});
+
 vi.mock('../../src/components/business/GoTreeResource.vue', async () => {
   const { defineComponent, h } = await import('vue');
   return {

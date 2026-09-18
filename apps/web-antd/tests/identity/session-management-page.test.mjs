@@ -33,6 +33,14 @@ vi.mock('../../src/components/foundation/GoCapabilityProvider.vue', () => ({
       },
   }),
 }));
+vi.mock('../../src/components/foundation/GoAccess.vue', () => ({
+  default: defineComponent({
+    setup:
+      (_, { slots }) =>
+      () =>
+        slots.default?.(),
+  }),
+}));
 vi.mock('../../src/components/business/GoResourceWorkspace.vue', () => ({
   default: defineComponent({
     props: ['queryFields', 'table'],
