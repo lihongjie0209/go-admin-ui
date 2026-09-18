@@ -9,8 +9,15 @@ defineOptions({ name: 'Fallback404Demo' });
 
 const homePath = ref('/apps');
 onMounted(async () => {
-  const application = await getCurrentApplication();
-  homePath.value = application ? getApplicationHomePath(application) : '/apps';
+  try {
+    const application = await getCurrentApplication();
+    homePath.value = application
+      ? getApplicationHomePath(application)
+      : '/apps';
+  } catch {
+    // A missing application-read grant must not break the error page itself.
+    homePath.value = '/apps';
+  }
 });
 </script>
 

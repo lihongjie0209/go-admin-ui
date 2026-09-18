@@ -28,6 +28,11 @@ const createOpen = ref(false);
 const initialDocument = ref('');
 const versionsOpen = ref(false);
 const selectedPolicy = ref<PolicyRecord>();
+const tenantContextReadCapability = {
+  action: 'read',
+  key: 'tenant.context:read',
+  resource: 'tenant.context',
+};
 
 const queryFields: QueryField[] = [
   {
@@ -97,6 +102,8 @@ const table = computed<GoResourceTableProps>(() => {
       { field: 'action', fixed: 'right', title: '操作', width: 260 },
     ],
     createAction: openCreate,
+    createAuthorizations:
+      props.kind.scope === 'tenant' ? [tenantContextReadCapability] : [],
     endpoints: {
       create: `${prefix}/create`,
       delete: `${prefix}/status/set`,
