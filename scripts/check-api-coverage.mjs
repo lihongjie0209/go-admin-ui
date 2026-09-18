@@ -45,10 +45,13 @@ export function extractLiteralAPIPaths(source) {
 function validateEntries(manifest, openAPIPaths) {
   if (manifest.schema_version !== 1)
     throw new Error('coverage manifest schema_version must be 1');
-  const entries = [
-    ...(Array.isArray(manifest.covered) ? manifest.covered : []),
-    ...(Array.isArray(manifest.excluded) ? manifest.excluded : []),
-  ];
+  const covered = Array.isArray(manifest.covered) ? manifest.covered : [];
+  if (covered.length > 0) {
+    throw new Error(
+      'covered manifest entries are forbidden; business operations require a literal production-source owner',
+    );
+  }
+  const entries = Array.isArray(manifest.excluded) ? manifest.excluded : [];
   const seen = new Set();
   for (const entry of entries) {
     if (

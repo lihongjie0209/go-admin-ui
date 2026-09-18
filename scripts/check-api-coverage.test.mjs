@@ -7,17 +7,11 @@ import { auditCoverage } from './check-api-coverage.mjs';
 const sourceRoot = resolve('apps/web-antd/src');
 
 describe('openAPI frontend coverage gate', () => {
-  it('combines real source ownership with reviewed dynamic and excluded paths', async () => {
+  it('combines real source ownership with reviewed excluded paths', async () => {
     const result = await auditCoverage({
       manifest: {
         schema_version: 1,
-        covered: [
-          {
-            path: '/dynamic/policies/page',
-            reason:
-              'The policy workspace constructs this endpoint from its selected scope.',
-          },
-        ],
+        covered: [],
         excluded: [
           {
             path: '/live',
@@ -28,7 +22,6 @@ describe('openAPI frontend coverage gate', () => {
       },
       openAPI: {
         paths: {
-          '/api/v1/dynamic/policies/page': {},
           '/api/v1/profile/get': {},
           '/live': {},
         },
@@ -38,6 +31,26 @@ describe('openAPI frontend coverage gate', () => {
 
     expect(result.literal.has('/profile/get')).toBe(true);
     expect(result.uncovered).toEqual([]);
+  });
+
+  it('rejects manually asserted coverage without a production-source owner', async () => {
+    await expect(
+      auditCoverage({
+        manifest: {
+          schema_version: 1,
+          covered: [
+            {
+              path: '/unimplemented/page',
+              reason:
+                'A comment must not substitute for a real frontend implementation.',
+            },
+          ],
+          excluded: [],
+        },
+        openAPI: { paths: { '/api/v1/unimplemented/page': {} } },
+        sourceRoot,
+      }),
+    ).rejects.toThrow('covered manifest entries are forbidden');
   });
 
   it('reports a newly introduced backend operation without an owner', async () => {
@@ -55,14 +68,14 @@ describe('openAPI frontend coverage gate', () => {
       auditCoverage({
         manifest: {
           schema_version: 1,
-          covered: [
+          covered: [],
+          excluded: [
             {
               path: '/removed/page',
               reason:
                 'This entry deliberately represents a removed backend operation.',
             },
           ],
-          excluded: [],
         },
         openAPI: { paths: { '/api/v1/profile/get': {} } },
         sourceRoot,
