@@ -25,6 +25,7 @@ import { usePageCapability } from '#/composables/use-page-capabilities';
 import {
   createPolicyVersion,
   defaultPolicySimulationInput,
+  getPolicyVersion,
   pagePolicyVersions,
   policyAuthorizationResource,
   publishPolicyVersion,
@@ -33,6 +34,7 @@ import {
 
 import PolicyDocumentDrawer from './PolicyDocumentDrawer.vue';
 import PolicySimulationDrawer from './PolicySimulationDrawer.vue';
+import PolicyVersionDetailDrawer from './PolicyVersionDetailDrawer.vue';
 
 const props = defineProps<{
   kind: PolicyLifecycleKind;
@@ -71,6 +73,11 @@ const failure = ref('');
 const documentOpen = ref(false);
 const simulationOpen = ref(false);
 const selectedVersion = ref<PolicyVersionRecord>();
+const detailOpen = ref(false);
+const detailVersion = ref<PolicyVersionRecord>();
+const detailLoading = ref(false);
+const detailVersionNumber = ref<number>();
+let detailController: AbortController | undefined;
 const simulationInput = computed(() =>
   selectedVersion.value
     ? defaultPolicySimulationInput(props.kind, selectedVersion.value.document)
@@ -167,6 +174,37 @@ function openSimulationRecord(record: Record<string, unknown>) {
   openSimulation(record as PolicyVersionRecord);
 }
 
+async function viewVersion(record: Record<string, unknown>) {
+  const policy = props.policy;
+  if (!policy || detailLoading.value) return;
+  detailController?.abort();
+  const controller = new AbortController();
+  detailController = controller;
+  detailLoading.value = true;
+  detailVersionNumber.value = Number(record.version_number);
+  try {
+    detailVersion.value = await getPolicyVersion(
+      props.kind,
+      policy.id,
+      Number(record.version_number),
+      controller.signal,
+    );
+    if (!controller.signal.aborted) detailOpen.value = true;
+  } catch (error) {
+    if (!controller.signal.aborted) {
+      message.error(
+        error instanceof Error ? error.message : '版本详情加载失败',
+      );
+    }
+  } finally {
+    if (detailController === controller) {
+      detailController = undefined;
+      detailLoading.value = false;
+      detailVersionNumber.value = undefined;
+    }
+  }
+}
+
 function versionStatusName(status: unknown) {
   return (
     {
@@ -204,6 +242,10 @@ watch(
       generation++;
       loadController?.abort();
       loadController = undefined;
+      detailController?.abort();
+      detailController = undefined;
+      detailOpen.value = false;
+      detailVersion.value = undefined;
       versions.value = [];
     }
   },
@@ -213,6 +255,7 @@ watch(
 onScopeDispose(() => {
   generation++;
   loadController?.abort();
+  detailController?.abort();
 });
 </script>
 
@@ -273,6 +316,15 @@ onScopeDispose(() => {
         />
         <Space v-else-if="column.key === 'action'">
           <Button
+            :loading="
+              detailLoading && detailVersionNumber === record.version_number
+            "
+            size="small"
+            @click="viewVersion(record)"
+          >
+            查看
+          </Button>
+          <Button
             v-if="simulateCapability.allowed.value"
             size="small"
             @click="openSimulationRecord(record)"
@@ -309,6 +361,10 @@ onScopeDispose(() => {
       :initial-input="simulationInput"
       :run="runSimulation"
       title="模拟策略求值"
+    />
+    <PolicyVersionDetailDrawer
+      v-model:open="detailOpen"
+      :record="detailVersion"
     />
   </Drawer>
 </template>

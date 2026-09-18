@@ -4,6 +4,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 
 import DocumentDrawer from '../../src/components/business/policy/PolicyDocumentDrawer.vue';
 import SimulationDrawer from '../../src/components/business/policy/PolicySimulationDrawer.vue';
+import VersionDetailDrawer from '../../src/components/business/policy/PolicyVersionDetailDrawer.vue';
 
 vi.mock('ant-design-vue', async () => {
   const { defineComponent, h } = await import('vue');
@@ -41,11 +42,14 @@ vi.mock('ant-design-vue', async () => {
   return {
     Alert,
     Button,
+    Descriptions: passthrough,
+    DescriptionsItem: passthrough,
     Drawer: passthrough,
     Form: passthrough,
     FormItem: passthrough,
     Input: { TextArea },
     Space: passthrough,
+    Tag: passthrough,
   };
 });
 
@@ -159,4 +163,28 @@ it('关闭模拟抽屉会取消运行中的请求且不回写晚到结果', asyn
   resolve({ allowed: true });
   await flush();
   expect(root.querySelectorAll('textarea')).toHaveLength(1);
+});
+
+it('版本详情抽屉只读展示服务端返回的不可变文档', async () => {
+  await mount(VersionDetailDrawer, {
+    open: true,
+    record: {
+      created_at: '2026-09-18T08:00:00+08:00',
+      created_by: 'operator-1',
+      document: 'spec:\n  effect: allow',
+      id: 'version-3',
+      policy_id: 'policy-id',
+      published_at: '2026-09-18T09:00:00+08:00',
+      published_by: 'publisher-1',
+      status: 'published',
+      version: 1,
+      version_number: 3,
+    },
+  });
+
+  const document = root.querySelector('textarea');
+  expect(root.textContent).toContain('v3');
+  expect(root.textContent).toContain('已发布');
+  expect(document.readOnly).toBe(true);
+  expect(document.value).toBe('spec:\n  effect: allow');
 });

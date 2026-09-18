@@ -4,6 +4,7 @@ import {
   createPolicyVersion,
   defaultPolicyDocument,
   defaultPolicySimulationInput,
+  getPolicyVersion,
   parsePolicyDocument,
   publishPolicyVersion,
   setPolicyStatus,
@@ -90,6 +91,18 @@ it('版本创建、发布和状态切换始终携带乐观锁版本', async () =
       policy_id: 'policy-id',
       status: 'disabled',
     },
+  );
+});
+
+it('按策略和版本号读取不可变版本详情并传递取消信号', async () => {
+  const signal = new AbortController().signal;
+
+  await getPolicyVersion(dataTenant, 'policy-id', 3, signal);
+
+  expect(api.post).toHaveBeenLastCalledWith(
+    '/data-permissions/tenant-policies/versions/get',
+    { policy_id: 'policy-id', version_number: 3 },
+    { signal },
   );
 });
 

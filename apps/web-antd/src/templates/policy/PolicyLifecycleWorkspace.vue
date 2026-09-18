@@ -18,6 +18,7 @@ import {
   currentTenantID,
   defaultPolicyDocument,
   policyAuthorizationResource,
+  policyResourceEndpoints,
   setPolicyStatus,
 } from '#/modules/policy/lifecycle-api';
 
@@ -70,8 +71,6 @@ const queryFields: QueryField[] = [
 ];
 
 const table = computed<GoResourceTableProps>(() => {
-  const base = props.kind.domain === 'pbac' ? '/pbac' : '/data-permissions';
-  const prefix = `${base}/${props.kind.scope}-policies`;
   return {
     allowCreate: true,
     allowDelete: false,
@@ -104,13 +103,7 @@ const table = computed<GoResourceTableProps>(() => {
     createAction: openCreate,
     createAuthorizations:
       props.kind.scope === 'tenant' ? [tenantContextReadCapability] : [],
-    endpoints: {
-      create: `${prefix}/create`,
-      delete: `${prefix}/status/set`,
-      get: `${prefix}/get`,
-      page: `${prefix}/page`,
-      update: `${prefix}/status/set`,
-    },
+    endpoints: policyResourceEndpoints(props.kind),
     rowActions: [
       {
         authorization: {

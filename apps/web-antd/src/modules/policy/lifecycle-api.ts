@@ -21,19 +21,16 @@ export interface PolicyRecord extends Record<string, unknown> {
 }
 
 export interface PolicyVersionRecord extends Record<string, unknown> {
+  created_at?: string;
+  created_by?: string;
   document: string;
   id: string;
   policy_id: string;
+  published_at?: null | string;
+  published_by?: null | string;
   status: 'archived' | 'draft' | 'published';
   version: number;
   version_number: number;
-}
-
-export interface PolicyPage {
-  items: PolicyRecord[];
-  page: number;
-  page_size: number;
-  total: number;
 }
 
 export interface PolicyVersionPage {
@@ -43,14 +40,90 @@ export interface PolicyVersionPage {
   total: number;
 }
 
-function segment(kind: PolicyLifecycleKind) {
-  const domain = kind.domain === 'pbac' ? 'pbac' : 'data-permissions';
-  return `/${domain}/${kind.scope}-policies`;
+interface PolicyEndpoints {
+  create: string;
+  get: string;
+  page: string;
+  publish: string;
+  setStatus: string;
+  simulate: string;
+  versionCreate: string;
+  versionGet: string;
+  versionPage: string;
+}
+
+const policyEndpoints: Record<
+  PolicyDomain,
+  Record<PolicyScope, PolicyEndpoints>
+> = {
+  'data-permission': {
+    global: {
+      create: '/data-permissions/global-policies/create',
+      get: '/data-permissions/global-policies/get',
+      page: '/data-permissions/global-policies/page',
+      publish: '/data-permissions/global-policies/publish',
+      setStatus: '/data-permissions/global-policies/status/set',
+      simulate: '/data-permissions/global-policies/simulate',
+      versionCreate: '/data-permissions/global-policies/versions/create',
+      versionGet: '/data-permissions/global-policies/versions/get',
+      versionPage: '/data-permissions/global-policies/versions/page',
+    },
+    tenant: {
+      create: '/data-permissions/tenant-policies/create',
+      get: '/data-permissions/tenant-policies/get',
+      page: '/data-permissions/tenant-policies/page',
+      publish: '/data-permissions/tenant-policies/publish',
+      setStatus: '/data-permissions/tenant-policies/status/set',
+      simulate: '/data-permissions/tenant-policies/simulate',
+      versionCreate: '/data-permissions/tenant-policies/versions/create',
+      versionGet: '/data-permissions/tenant-policies/versions/get',
+      versionPage: '/data-permissions/tenant-policies/versions/page',
+    },
+  },
+  pbac: {
+    global: {
+      create: '/pbac/global-policies/create',
+      get: '/pbac/global-policies/get',
+      page: '/pbac/global-policies/page',
+      publish: '/pbac/global-policies/publish',
+      setStatus: '/pbac/global-policies/status/set',
+      simulate: '/pbac/global-policies/simulate',
+      versionCreate: '/pbac/global-policies/versions/create',
+      versionGet: '/pbac/global-policies/versions/get',
+      versionPage: '/pbac/global-policies/versions/page',
+    },
+    tenant: {
+      create: '/pbac/tenant-policies/create',
+      get: '/pbac/tenant-policies/get',
+      page: '/pbac/tenant-policies/page',
+      publish: '/pbac/tenant-policies/publish',
+      setStatus: '/pbac/tenant-policies/status/set',
+      simulate: '/pbac/tenant-policies/simulate',
+      versionCreate: '/pbac/tenant-policies/versions/create',
+      versionGet: '/pbac/tenant-policies/versions/get',
+      versionPage: '/pbac/tenant-policies/versions/page',
+    },
+  },
+};
+
+function endpoints(kind: PolicyLifecycleKind) {
+  return policyEndpoints[kind.domain][kind.scope];
 }
 
 export function policyAuthorizationResource(kind: PolicyLifecycleKind) {
   const domain = kind.domain === 'pbac' ? 'pbac' : 'data-permission';
   return `${domain}.${kind.scope}-policy`;
+}
+
+export function policyResourceEndpoints(kind: PolicyLifecycleKind) {
+  const endpoint = endpoints(kind);
+  return {
+    create: endpoint.create,
+    delete: endpoint.setStatus,
+    get: endpoint.get,
+    page: endpoint.page,
+    update: endpoint.setStatus,
+  };
 }
 
 export function parsePolicyDocument(document: string): Record<string, unknown> {
@@ -163,22 +236,8 @@ export async function currentTenantID() {
   return tenant.tenant_id;
 }
 
-export function pagePolicies(
-  kind: PolicyLifecycleKind,
-  request: Record<string, unknown>,
-  signal?: AbortSignal,
-) {
-  return requestClient.post<PolicyPage>(`${segment(kind)}/page`, request, {
-    signal,
-  });
-}
-
-export function getPolicy(kind: PolicyLifecycleKind, id: string) {
-  return requestClient.post<PolicyRecord>(`${segment(kind)}/get`, { id });
-}
-
 export function createPolicy(kind: PolicyLifecycleKind, document: string) {
-  return requestClient.post(`${segment(kind)}/create`, {
+  return requestClient.post(endpoints(kind).create, {
     policy: parsePolicyDocument(document),
   });
 }
@@ -191,12 +250,28 @@ export function pagePolicyVersions(
   signal?: AbortSignal,
 ) {
   return requestClient.post<PolicyVersionPage>(
-    `${segment(kind)}/versions/page`,
+    endpoints(kind).versionPage,
     {
       page,
       page_size: pageSize,
       policy_id: policyID,
       statuses: [],
+    },
+    { signal },
+  );
+}
+
+export function getPolicyVersion(
+  kind: PolicyLifecycleKind,
+  policyID: string,
+  versionNumber: number,
+  signal?: AbortSignal,
+) {
+  return requestClient.post<PolicyVersionRecord>(
+    endpoints(kind).versionGet,
+    {
+      policy_id: policyID,
+      version_number: versionNumber,
     },
     { signal },
   );
@@ -208,7 +283,7 @@ export function createPolicyVersion(
   document: string,
 ) {
   return requestClient.post<PolicyVersionRecord>(
-    `${segment(kind)}/versions/create`,
+    endpoints(kind).versionCreate,
     {
       expected_policy_version: policy.version,
       policy: parsePolicyDocument(document),
@@ -222,7 +297,7 @@ export function publishPolicyVersion(
   policy: PolicyRecord,
   versionNumber: number,
 ) {
-  return requestClient.post(`${segment(kind)}/publish`, {
+  return requestClient.post(endpoints(kind).publish, {
     expected_policy_version: policy.version,
     policy_id: policy.id,
     version_number: versionNumber,
@@ -234,7 +309,7 @@ export function setPolicyStatus(
   policy: PolicyRecord,
   status: 'active' | 'disabled',
 ) {
-  return requestClient.post<PolicyRecord>(`${segment(kind)}/status/set`, {
+  return requestClient.post<PolicyRecord>(endpoints(kind).setStatus, {
     expected_policy_version: policy.version,
     policy_id: policy.id,
     status,
@@ -249,7 +324,7 @@ export function simulatePolicy(
 ) {
   const policy = parsePolicyDocument(document);
   return requestClient.post(
-    `${segment(kind)}/simulate`,
+    endpoints(kind).simulate,
     kind.domain === 'pbac' ? { policy, request: input } : { ...input, policy },
     { signal },
   );
