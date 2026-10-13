@@ -139,10 +139,9 @@ watch(() => props.selected?.id, close);
         :disabled="loading || !!failure"
         :loading="saving"
         @click="save"
-        >
-保存关联
-</Button
       >
+        保存关联
+      </Button>
     </template>
   </Drawer>
 </template>

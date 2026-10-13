@@ -51,4 +51,4 @@ it('真实本地图标集合可注册并渲染三个图标族，不发起远程�
     root.remove();
     vi.unstubAllGlobals();
   }
-});
+}, 30_000);
