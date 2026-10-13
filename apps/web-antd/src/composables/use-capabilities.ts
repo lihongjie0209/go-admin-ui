@@ -6,32 +6,58 @@ import { computed, onScopeDispose, ref, toValue, watch } from 'vue';
 
 import { evaluateCapabilities, evaluateRowCapabilities } from '#/api/go';
 
+import { capabilityRefreshDelay } from './capability-refresh';
+
 export function useCapability(request: MaybeRefOrGetter<CapabilityRequest>) {
   const allowed = ref(false);
   const requestError = ref<unknown>();
   const loading = ref(true);
   let generation = 0;
+  let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function schedule(expiresAt?: string) {
+    if (refreshTimer) clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(
+      () => void refresh(),
+      capabilityRefreshDelay(expiresAt),
+    );
+  }
 
   async function refresh() {
     const current = ++generation;
+    if (refreshTimer) clearTimeout(refreshTimer);
     allowed.value = false;
     requestError.value = undefined;
     loading.value = true;
     try {
       const item = toValue(request);
       const result = await evaluateCapabilities([item]);
-      if (current === generation)
+      if (current === generation) {
         allowed.value = result.items[0]?.allowed === true;
+        schedule(result.expires_at);
+      }
     } catch (error) {
-      if (current === generation) requestError.value = error;
+      if (current === generation) {
+        requestError.value = error;
+        schedule();
+      }
     } finally {
       if (current === generation) loading.value = false;
     }
   }
 
   watch(() => toValue(request), refresh, { deep: true, immediate: true });
+  if (typeof window !== 'undefined') {
+    window.addEventListener('go:principal-context-changed', refresh);
+    window.addEventListener('focus', refresh);
+  }
   onScopeDispose(() => {
     generation++;
+    if (refreshTimer) clearTimeout(refreshTimer);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('go:principal-context-changed', refresh);
+      window.removeEventListener('focus', refresh);
+    }
   });
   return {
     allowed: computed(() => allowed.value),
@@ -50,9 +76,19 @@ export function useRowCapabilities(
   const requestError = ref<unknown>();
   const loading = ref(false);
   let generation = 0;
+  let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function schedule(expiresAt?: string) {
+    if (refreshTimer) clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(
+      () => void refresh(),
+      capabilityRefreshDelay(expiresAt),
+    );
+  }
 
   async function refresh() {
     const current = ++generation;
+    if (refreshTimer) clearTimeout(refreshTimer);
     decisions.value = {};
     requestError.value = undefined;
     const ids = [...new Set(toValue(resourceIds))];
@@ -68,9 +104,13 @@ export function useRowCapabilities(
         decisions.value = Object.fromEntries(
           result.items.map((item) => [item.resource_id, item.actions]),
         );
+        schedule(result.expires_at);
       }
     } catch (error) {
-      if (current === generation) requestError.value = error;
+      if (current === generation) {
+        requestError.value = error;
+        schedule();
+      }
     } finally {
       if (current === generation) loading.value = false;
     }
@@ -85,8 +125,17 @@ export function useRowCapabilities(
     refresh,
     { deep: true, immediate: true },
   );
+  if (typeof window !== 'undefined') {
+    window.addEventListener('go:principal-context-changed', refresh);
+    window.addEventListener('focus', refresh);
+  }
   onScopeDispose(() => {
     generation++;
+    if (refreshTimer) clearTimeout(refreshTimer);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('go:principal-context-changed', refresh);
+      window.removeEventListener('focus', refresh);
+    }
   });
   return {
     allowed: (resourceId: string, action: string) =>

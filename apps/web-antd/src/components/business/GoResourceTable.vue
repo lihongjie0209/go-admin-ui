@@ -6,9 +6,9 @@ import type { VersionedRecord } from '#/api/go';
 import { computed, onScopeDispose, ref, watch } from 'vue';
 
 import { createResourceApi } from '#/api/go';
+import { useRowCapabilities } from '#/composables/use-capabilities';
 import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
-import { useRowCapabilities } from '#/composables/use-pbac';
 
 import GoDataGrid from './GoDataGrid.vue';
 
@@ -22,6 +22,8 @@ const props = withDefaults(defineProps<GoResourceTableProps>(), {
   rowActions: () => [],
   rowAuthorization: false,
   batchActions: () => [],
+  canDeleteRecord: () => true,
+  canEditRecord: () => true,
 });
 
 const table = ref<InstanceType<typeof GoDataGrid>>();
@@ -206,6 +208,7 @@ defineExpose({
     :can-edit="
       (row) =>
         allowEdit &&
+        canEditRecord(row) &&
         updateCapability.allowed.value &&
         updateAdditionalCapabilities.every(
           (capability) => capability.allowed.value,
@@ -215,6 +218,7 @@ defineExpose({
     :can-remove="
       (row) =>
         allowDelete &&
+        canDeleteRecord(row) &&
         deleteCapability.allowed.value &&
         (!rowAuthorization || rowCapabilities.allowed(String(row.id), 'delete'))
     "

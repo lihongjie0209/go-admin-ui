@@ -22,6 +22,8 @@ export interface GoResourceTableProps {
   allowEdit?: boolean;
   authorizationResource: string;
   batchActions?: GridBatchAction[];
+  canDeleteRecord?: (row: Record<string, unknown>) => boolean;
+  canEditRecord?: (row: Record<string, unknown>) => boolean;
   columns: GridColumn[];
   createAuthorizations?: CapabilityRequest[];
   createAction?: () => void;

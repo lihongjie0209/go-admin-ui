@@ -52,7 +52,7 @@ describe('tenant resource contracts', () => {
     });
   });
 
-  it('binds roles and departments to their PBAC resources', () => {
+  it('binds roles and departments to their authorization resources', () => {
     expect(tenantRolePageContract.authorizationResource).toBe('tenant.role');
     expect(tenantRolePageContract.table.rowAuthorization).toBe(true);
     expect(tenantDepartmentTreeContract.authorizationResource).toBe(

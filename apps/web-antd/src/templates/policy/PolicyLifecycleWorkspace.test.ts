@@ -22,7 +22,7 @@ function mountWorkspace(scope: 'global' | 'tenant') {
       },
     },
     props: {
-      kind: { domain: 'pbac', scope },
+      kind: { domain: 'data-permission', scope },
     },
   });
 }

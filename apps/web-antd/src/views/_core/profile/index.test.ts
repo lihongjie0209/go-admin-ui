@@ -78,7 +78,7 @@ describe('profilePage', () => {
     });
   });
 
-  it('only renders account-security entries allowed by PBAC', async () => {
+  it('only renders account-security entries allowed by capabilities', async () => {
     const wrapper = mount(ProfilePage);
     await flushPromises();
 

@@ -6,7 +6,7 @@ The frontend is assembled in one direction. Page templates may depend on busines
 Go API contracts + request envelope
         ↓
 Foundation components
-  PBAC, dictionaries, dates, references, status, audit
+  capabilities, dictionaries, dates, references, status, audit
         ↓
 Reusable business components
   resource table, query form, editor, batch/row actions
@@ -28,7 +28,7 @@ All option controls use `POST /api/v1/public/dictionaries/query`. A component re
 
 The backend returns complete bounded trees. The UI builds parent/child links with item IDs, uses `value` as the submitted business value, preserves disabled items for display, forwards the bounded extension object, and fails visibly when a component is bound to the wrong dictionary type. Search is remote and debounced. Stale responses cannot overwrite a newer query.
 
-## Navigation and PBAC
+## Navigation and Resource/Action capabilities
 
 The left navigation is the current application's server-authorized navigation tree. Directories provide hierarchy; menu nodes provide route, component, `resource`, and `action`. Ordering is `sort_order` followed by stable ID. The frontend does not keep a second static menu or permission list.
 
@@ -38,18 +38,18 @@ Every page root uses `GoCapabilityProvider` and declares its stable capability k
 
 ## Test levels
 
-- Unit tests call exported request transforms, dictionary transforms, PBAC state logic, and navigation mapping directly.
+- Unit tests call exported request transforms, dictionary transforms, capability state logic, and navigation mapping directly.
 - Component integration tests mount the real Vue components and exercise loading, selection, search, error, concurrency, and unmount behavior through their public props and emitted events.
-- Page integration tests compose the real foundation and business components against a controlled HTTP boundary and verify the Go envelope, POST payload, optimistic version, PBAC visibility, and rendered result.
+- Page integration tests compose the real foundation and business components against a controlled HTTP boundary and verify the Go envelope, POST payload, optimistic version, capability visibility, and rendered result.
 - Browser end-to-end tests are reserved for a later concrete business module; phase one has no domain page to drive.
 
 Reading component source text and asserting that strings are present is not a behavioral test and does not count toward coverage or Definition of Done.
 
 ## Backend API ownership gate
 
-CI checks the current `go-api-template` OpenAPI document against the frontend source tree. A literal API path is owned automatically by the module that calls it. Endpoints assembled from bounded variants, such as the PBAC and data-policy scope segments, are listed explicitly in `contracts/openapi-ui-coverage.json`. Protocol and operational endpoints that must not have an operator page are listed separately with a concrete reason.
+CI checks the current `go-api-template` OpenAPI document against the frontend source tree. A literal API path is owned automatically by the module that calls it. Endpoints assembled from bounded variants, such as the data-policy scope segments, are listed explicitly in `contracts/openapi-ui-coverage.json`. Protocol and operational endpoints that must not have an operator page are listed separately with a concrete reason.
 
-The gate rejects an unowned backend operation, duplicate declaration, missing reason, and an obsolete declaration that no longer exists in OpenAPI. This is an ownership check rather than proof that a page is behaviorally complete; component and page tests remain mandatory for request payloads, PBAC behavior, loading, cancellation, errors, and presentation.
+The gate rejects an unowned backend operation, duplicate declaration, missing reason, and an obsolete declaration that no longer exists in OpenAPI. This is an ownership check rather than proof that a page is behaviorally complete; component and page tests remain mandatory for request payloads, capability behavior, loading, cancellation, errors, and presentation.
 
 ## Query and pagination
 
@@ -69,13 +69,17 @@ The frontend depends only on the platform's Go HTTP contracts and has no direct 
 
 ## Tree resources
 
-`GoTreeResource` consumes a bounded complete tree endpoint and provides search, selection, create/edit hooks, optimistic leaf deletion, retry state and PBAC action visibility. It normalizes every node to non-null `children`, stable `sort_order,id` ordering and a consistent `parent_id`. Duplicate IDs, cycles, dangling hierarchy declarations and invalid moves fail before a mutation is sent. Search retains ancestors for context and omits unrelated branches.
+`GoTreeResource` consumes a bounded complete tree endpoint and provides search, selection, create/edit hooks, optimistic leaf deletion, retry state and capability-based action visibility. It normalizes every node to non-null `children`, stable `sort_order,id` ordering and a consistent `parent_id`. Duplicate IDs, cycles, dangling hierarchy declarations and invalid moves fail before a mutation is sent. Search retains ancestors for context and omits unrelated branches.
 
 Page operation capabilities are evaluated once through `GoCapabilityProvider`. When row authorization is enabled, only the currently selected node is sent to the row-capability endpoint; a large tree must never be expanded into thousands of authorization requests. Concrete pages own the editor drawer through the component's create/edit events and call its exposed create/update methods after validating their domain fields.
 
 ## Resource editor
 
-`GoResourceEditor` is the declarative create, edit, and detail drawer used by flat and tree resource pages. A field declaration selects standard inputs, dictionaries, tree dictionaries, validation, defaults, and create/edit visibility. Create and update capabilities are registered with the page PBAC batch; denied or unresolved decisions disable submission and never replace backend enforcement.
+`GoResourceEditor` is the declarative create, edit, and detail drawer used by flat and tree resource pages. A field declaration selects standard inputs, dictionaries, tree dictionaries, validation, defaults, and create/edit visibility. Create and update capabilities are registered with the page capability batch; denied or unresolved decisions disable submission and never replace backend enforcement.
+
+## Authorization administration
+
+The resource and action catalog is managed at `views/policy/resources`; code-owned rows are read-only, while manual rows use versioned CRUD. The permission tree's “关联动作” drawer edits the full bounded action set with an expected permission version and offers only active actions in the same scope. Platform user/service-account grants use a separate versioned resource page. Data-permission policies remain a distinct module; the former operation-policy editor and API are removed. Capability checks are UI hints only; every mutation is reauthorized by the server.
 
 Edit submission includes a point-in-time copy of the original record, including `id` and `version`, so adapters can enforce optimistic locking. The editor prevents duplicate submission, maps backend `field_errors` back to fields, preserves `request_id` for support, gives stale-version errors a dedicated recovery message, and confirms before discarding dirty state. Values crossing the submit boundary are JSON request data rather than Vue proxies. Detail mode is read-only and has no save action.
 

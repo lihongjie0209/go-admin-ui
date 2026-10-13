@@ -4,12 +4,12 @@ import type {
 } from '#/templates/resource/resource-page-contract';
 
 import { triggerScheduledJob } from '#/api/go/scheduled-job';
+import {
+  loadCatalogActionOptions,
+  loadCatalogResourceOptions,
+} from '#/modules/platform/authorization-options';
 import { loadPageComponentOptions } from '#/modules/platform/page-component-registry';
 import { loadScheduledJobHandlerOptions } from '#/modules/platform/scheduled-job-options';
-import {
-  loadPBACActionOptions,
-  loadPBACResourceOptions,
-} from '#/modules/policy/pbac-editor-options';
 
 const enabledOptions = [
   { label: '启用', value: 'active' },
@@ -23,11 +23,22 @@ const actionColumn = {
   width: 190,
 };
 
-const pbacResourceListCapability = {
+const catalogResourceListCapability = {
   action: 'list',
-  key: 'pbac.resource-action:list',
-  resource: 'pbac.resource-action',
+  key: 'authorization.resource:list',
+  resource: 'authorization.resource',
 };
+
+const catalogActionListCapability = {
+  action: 'list',
+  key: 'authorization.action:list',
+  resource: 'authorization.action',
+};
+
+const catalogListCapabilities = [
+  catalogResourceListCapability,
+  catalogActionListCapability,
+];
 
 const auditDetailFields = [
   { field: 'created_at', label: '创建时间', presentation: 'datetime' as const },
@@ -1036,8 +1047,8 @@ export function navigationTreeContract(
     };
   return {
     authorizationResource: 'navigation',
-    capabilities: [pbacResourceListCapability],
-    createAuthorizations: [pbacResourceListCapability],
+    capabilities: catalogListCapabilities,
+    createAuthorizations: catalogListCapabilities,
     editorFields: [
       {
         component: 'hidden',
@@ -1087,8 +1098,8 @@ export function navigationTreeContract(
         component: 'select',
         field: 'resource',
         label: '资源',
-        optionLoader: loadPBACResourceOptions,
-        placeholder: '选择 PBAC 资源',
+        optionLoader: loadCatalogResourceOptions,
+        placeholder: '选择资源',
         validate: requiredForMenu('资源'),
       },
       {
@@ -1096,7 +1107,7 @@ export function navigationTreeContract(
         component: 'select',
         field: 'action',
         label: '动作',
-        optionLoader: loadPBACActionOptions,
+        optionLoader: loadCatalogActionOptions,
         optionsDependsOn: ['resource'],
         placeholder: '先选择资源，再选择动作',
         validate: requiredForMenu('动作'),
@@ -1139,7 +1150,7 @@ export function navigationTreeContract(
       update: '/navigations/update',
     },
     fixedFilters: { application_id: applicationID },
-    updateAuthorizations: [pbacResourceListCapability],
+    updateAuthorizations: catalogListCapabilities,
   };
 }
 
@@ -1147,8 +1158,8 @@ export const permissionTreeContract: TreeResourcePageContract = {
   authorizationResource: 'permission.definition',
   canDeleteNode: (node) => node.is_system !== true,
   canEditNode: (node) => node.is_system !== true,
-  capabilities: [pbacResourceListCapability],
-  createAuthorizations: [pbacResourceListCapability],
+  capabilities: catalogListCapabilities,
+  createAuthorizations: catalogListCapabilities,
   editorFields: [
     { component: 'hidden', field: 'parent_id', label: '父权限 ID' },
     {
@@ -1175,8 +1186,8 @@ export const permissionTreeContract: TreeResourcePageContract = {
       component: 'select',
       field: 'resource',
       label: '资源',
-      optionLoader: loadPBACResourceOptions,
-      placeholder: '选择 PBAC 资源',
+      optionLoader: loadCatalogResourceOptions,
+      placeholder: '选择资源',
       validate: (value, values) =>
         values.node_type !== 'permission' || String(value ?? '').trim()
           ? undefined
@@ -1187,7 +1198,7 @@ export const permissionTreeContract: TreeResourcePageContract = {
       component: 'select',
       field: 'action',
       label: '动作',
-      optionLoader: loadPBACActionOptions,
+      optionLoader: loadCatalogActionOptions,
       optionsDependsOn: ['resource'],
       placeholder: '先选择资源，再选择动作',
       validate: (value, values) =>
@@ -1219,5 +1230,5 @@ export const permissionTreeContract: TreeResourcePageContract = {
     tree: '/permissions/tree',
     update: '/permissions/update',
   },
-  updateAuthorizations: [pbacResourceListCapability],
+  updateAuthorizations: catalogListCapabilities,
 };

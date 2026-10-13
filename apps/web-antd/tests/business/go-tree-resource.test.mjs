@@ -115,8 +115,8 @@ const capabilities = ['list', 'create', 'update', 'delete'].map((action) => ({
 }));
 const editorDependency = {
   action: 'list',
-  key: 'pbac.resource-action:list',
-  resource: 'pbac.resource-action',
+  key: 'authorization.resource:list',
+  resource: 'authorization.resource',
 };
 capabilities.push(editorDependency);
 

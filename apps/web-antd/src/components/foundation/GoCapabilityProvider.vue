@@ -4,6 +4,7 @@ import type { CapabilityRequest } from '#/api/go';
 import { onScopeDispose, provide, ref, watch } from 'vue';
 
 import { evaluateCapabilities } from '#/api/go';
+import { capabilityRefreshDelay } from '#/composables/capability-refresh';
 import { pageCapabilityKey } from '#/composables/use-page-capabilities';
 
 const props = withDefaults(
@@ -25,6 +26,15 @@ const evaluationError = ref<unknown>();
 const loading = ref(false);
 let generation = 0;
 let refreshQueued = false;
+let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+
+function scheduleRefresh(expiresAt?: string) {
+  if (refreshTimer) clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(
+    () => void refresh(),
+    capabilityRefreshDelay(expiresAt),
+  );
+}
 
 function declarations() {
   const conflictedKey = registrationConflicts.keys().next().value;
@@ -55,6 +65,7 @@ function declarations() {
 
 async function refresh() {
   const current = ++generation;
+  if (refreshTimer) clearTimeout(refreshTimer);
   evaluationError.value = undefined;
   decisions.value = {};
 
@@ -75,8 +86,12 @@ async function refresh() {
     if (current !== generation) return;
     for (const item of result.items)
       decisions.value[item.key] = item.allowed === true;
+    scheduleRefresh(result.expires_at);
   } catch (error) {
-    if (current === generation) evaluationError.value = error;
+    if (current === generation) {
+      evaluationError.value = error;
+      scheduleRefresh();
+    }
   } finally {
     if (current === generation) loading.value = false;
   }
@@ -137,6 +152,7 @@ function register(request: CapabilityRequest) {
     if (!registered) return;
     if (registered.count === 1) dynamic.delete(request.key);
     else registered.count--;
+    queueRefresh();
   };
 }
 
@@ -149,8 +165,17 @@ provide(pageCapabilityKey, {
 });
 
 watch(() => props.capabilities, queueRefresh, { deep: true, immediate: true });
+if (typeof window !== 'undefined') {
+  window.addEventListener('focus', queueRefresh);
+  window.addEventListener('go:principal-context-changed', queueRefresh);
+}
 onScopeDispose(() => {
   generation++;
+  if (refreshTimer) clearTimeout(refreshTimer);
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('focus', queueRefresh);
+    window.removeEventListener('go:principal-context-changed', queueRefresh);
+  }
 });
 </script>
 

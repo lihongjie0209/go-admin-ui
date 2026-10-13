@@ -31,9 +31,9 @@ import {
   flattenTree,
   normalizeTree,
 } from '#/components/foundation/tree-contract';
+import { useRowCapabilities } from '#/composables/use-capabilities';
 import { useFrontendAction } from '#/composables/use-frontend-action';
 import { usePageCapability } from '#/composables/use-page-capabilities';
-import { useRowCapabilities } from '#/composables/use-pbac';
 
 const props = withDefaults(
   defineProps<{

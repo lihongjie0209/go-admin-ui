@@ -37,6 +37,32 @@ describe('goCapabilityProvider', () => {
     evaluate.mockReset();
   });
 
+  it('rechecks decisions when the principal or tenant context changes', async () => {
+    evaluate
+      .mockResolvedValueOnce({
+        expires_at: new Date(Date.now() + 60_000).toISOString(),
+        items: [{ allowed: true, key: 'identity.user:update' }],
+        revision: '1',
+      })
+      .mockResolvedValueOnce({
+        expires_at: new Date(Date.now() + 60_000).toISOString(),
+        items: [{ allowed: false, key: 'identity.user:update' }],
+        revision: '2',
+      });
+    const Consumer = capabilityConsumer();
+    const wrapper = mount(GoCapabilityProvider, {
+      slots: { default: () => h(Consumer) },
+    });
+    await flushPromises();
+    expect(wrapper.get('output').attributes('data-allowed')).toBe('true');
+
+    window.dispatchEvent(new Event('go:principal-context-changed'));
+    await flushPromises();
+    expect(evaluate).toHaveBeenCalledTimes(2);
+    expect(wrapper.get('output').attributes('data-allowed')).toBe('false');
+    wrapper.unmount();
+  });
+
   it('keeps dynamically registered actions denied until evaluation allows them', async () => {
     let resolveEvaluation!: (value: {
       expires_at: string;

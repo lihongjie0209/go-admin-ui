@@ -6,7 +6,7 @@ import {
 } from '../../src/api/core/menu';
 
 describe('go navigation contract', () => {
-  it('maps backend directories and menus without losing PBAC metadata', () => {
+  it('maps backend directories and menus without losing authorization metadata', () => {
     const result = mapNavigationTree([
       {
         action: '',

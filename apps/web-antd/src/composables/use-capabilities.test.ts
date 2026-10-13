@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { evaluateRowCapabilities } from '#/api/go';
 
-import { useRowCapabilities } from './use-pbac';
+import { useRowCapabilities } from './use-capabilities';
 
 vi.mock('#/api/go', () => ({
   evaluateCapabilities: vi.fn(),

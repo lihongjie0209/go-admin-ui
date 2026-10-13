@@ -2,7 +2,7 @@ import { parse, stringify } from 'yaml';
 
 import { requestClient } from '#/api/request';
 
-export type PolicyDomain = 'data-permission' | 'pbac';
+export type PolicyDomain = 'data-permission';
 export type PolicyScope = 'global' | 'tenant';
 
 export interface PolicyLifecycleKind {
@@ -80,30 +80,6 @@ const policyEndpoints: Record<
       versionPage: '/data-permissions/tenant-policies/versions/page',
     },
   },
-  pbac: {
-    global: {
-      create: '/pbac/global-policies/create',
-      get: '/pbac/global-policies/get',
-      page: '/pbac/global-policies/page',
-      publish: '/pbac/global-policies/publish',
-      setStatus: '/pbac/global-policies/status/set',
-      simulate: '/pbac/global-policies/simulate',
-      versionCreate: '/pbac/global-policies/versions/create',
-      versionGet: '/pbac/global-policies/versions/get',
-      versionPage: '/pbac/global-policies/versions/page',
-    },
-    tenant: {
-      create: '/pbac/tenant-policies/create',
-      get: '/pbac/tenant-policies/get',
-      page: '/pbac/tenant-policies/page',
-      publish: '/pbac/tenant-policies/publish',
-      setStatus: '/pbac/tenant-policies/status/set',
-      simulate: '/pbac/tenant-policies/simulate',
-      versionCreate: '/pbac/tenant-policies/versions/create',
-      versionGet: '/pbac/tenant-policies/versions/get',
-      versionPage: '/pbac/tenant-policies/versions/page',
-    },
-  },
 };
 
 function endpoints(kind: PolicyLifecycleKind) {
@@ -111,8 +87,7 @@ function endpoints(kind: PolicyLifecycleKind) {
 }
 
 export function policyAuthorizationResource(kind: PolicyLifecycleKind) {
-  const domain = kind.domain === 'pbac' ? 'pbac' : 'data-permission';
-  return `${domain}.${kind.scope}-policy`;
+  return `data-permission.${kind.scope}-policy`;
 }
 
 export function policyResourceEndpoints(kind: PolicyLifecycleKind) {
@@ -142,15 +117,11 @@ export function defaultPolicyDocument(
   tenantID = '',
 ) {
   const common = {
-    api_version:
-      kind.domain === 'pbac'
-        ? 'authorization.platform/v1'
-        : 'data-permission.platform/v1',
-    kind: kind.domain === 'pbac' ? 'ActionPolicy' : 'DataPermissionPolicy',
+    api_version: 'data-permission.platform/v1',
+    kind: 'DataPermissionPolicy',
     metadata: {
       code: 'replace-with-policy-code',
       name: '新策略',
-      ...(kind.domain === 'pbac' ? { description: '' } : {}),
     },
     scope: {
       type: kind.scope,
@@ -159,26 +130,18 @@ export function defaultPolicyDocument(
   };
   return formatPolicyDocument({
     ...common,
-    spec:
-      kind.domain === 'pbac'
-        ? {
-            actions: ['read'],
-            effect: 'allow',
-            resource: { type: 'replace.with.resource' },
-            subject: { authenticated: true },
-          }
-        : {
-            actions: ['read'],
-            condition: 'resource.id == subject.id',
-            effect: 'allow',
-            resource: 'replace.with.resource',
-            subject: { authenticated: true },
-          },
+    spec: {
+      actions: ['read'],
+      condition: 'resource.id == subject.id',
+      effect: 'allow',
+      resource: 'replace.with.resource',
+      subject: { authenticated: true },
+    },
   });
 }
 
 export function defaultPolicySimulationInput(
-  kind: PolicyLifecycleKind,
+  _kind: PolicyLifecycleKind,
   document: string,
 ) {
   const policy = parsePolicyDocument(document);
@@ -201,23 +164,6 @@ export function defaultPolicySimulationInput(
     type: 'user',
   };
   const resource = { tenant_id: tenantID, type: resourceType };
-  if (kind.domain === 'pbac') {
-    return {
-      action,
-      context: {
-        authentication_scheme: 'jwt',
-        business_day: true,
-        local_hour: 10,
-        operation: `${resourceType}:${action}`,
-        profile: 'development',
-        timezone: 'Asia/Shanghai',
-        transport: 'http',
-        weekday: 1,
-      },
-      resource,
-      subject,
-    };
-  }
   return {
     action,
     proposed_attributes: {},
@@ -325,7 +271,7 @@ export function simulatePolicy(
   const policy = parsePolicyDocument(document);
   return requestClient.post(
     endpoints(kind).simulate,
-    kind.domain === 'pbac' ? { policy, request: input } : { ...input, policy },
+    { ...input, policy },
     { signal },
   );
 }

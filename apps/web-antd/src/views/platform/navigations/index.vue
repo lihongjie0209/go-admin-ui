@@ -16,7 +16,7 @@ const contract = computed(() => navigationTreeContract(applicationID.value));
 <template>
   <Page
     :title="applicationName ? `${applicationName} · 导航` : '应用导航'"
-    description="目录组织层级；菜单绑定页面组件以及 PBAC 资源和动作。"
+    description="目录组织层级；菜单绑定页面组件以及资源和动作。"
   >
     <TreeResourcePage v-if="applicationID" :contract="contract" />
   </Page>
