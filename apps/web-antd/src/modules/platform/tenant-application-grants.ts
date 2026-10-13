@@ -58,33 +58,24 @@ export function getTenantApplicationGrant(
   );
 }
 
-export async function listActiveApplications(signal?: AbortSignal) {
-  const items: ApplicationOption[] = [];
-  const pageSize = 200;
-  const maxOptions = 10_000;
-  for (let page = 1; ; page++) {
-    if (signal?.aborted) throw new DOMException('已取消', 'AbortError');
-    const result = await requestClient.post<{
-      items: ApplicationOption[];
-      total: number;
-    }>(
-      '/applications/page',
-      {
-        page,
-        page_size: pageSize,
-        sort: [{ direction: 'asc', field: 'name' }],
-        statuses: ['active'],
-      },
-      { signal },
-    );
-    if (signal?.aborted) throw new DOMException('已取消', 'AbortError');
-    if (result.total > maxOptions)
-      throw new Error('应用候选超过 10000 个，无法完整加载');
-    items.push(...result.items);
-    if (items.length >= result.total) return items;
-    if (result.items.length === 0)
-      throw new Error('应用候选分页未返回完整数据，请重试');
-  }
+export function pageActiveApplications(
+  input: { keyword: string; page: number; page_size: number },
+  signal?: AbortSignal,
+) {
+  return requestClient.post<{
+    items: ApplicationOption[];
+    page: number;
+    page_size: number;
+    total: number;
+  }>(
+    '/applications/page',
+    {
+      ...input,
+      sort: [{ direction: 'asc', field: 'name' }],
+      statuses: ['active'],
+    },
+    { signal },
+  );
 }
 
 export function grantTenantApplication(input: {

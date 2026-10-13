@@ -20,6 +20,7 @@ import {
   Popconfirm,
   Select,
   Space,
+  Spin,
   Table,
   Tag,
 } from 'ant-design-vue';
@@ -31,7 +32,7 @@ import { usePageCapability } from '#/composables/use-page-capabilities';
 import {
   findTenantApplicationGrant,
   grantTenantApplication,
-  listActiveApplications,
+  pageActiveApplications,
   pageTenantApplicationGrants,
   revokeTenantApplication,
 } from '#/modules/platform/tenant-application-grants';
@@ -76,6 +77,12 @@ const applicationListCapability = usePageCapability({
 const grants = ref<TenantApplicationGrant[]>([]);
 const applications = ref<ApplicationOption[]>([]);
 const applicationID = ref('');
+const selectedApplication = ref<ApplicationOption>();
+const applicationKeyword = ref('');
+const applicationNextPage = ref(1);
+const applicationTotal = ref(0);
+const applicationLoading = ref(false);
+const applicationFailure = ref('');
 const validity = ref<[Dayjs, Dayjs] | undefined>();
 const keyword = ref('');
 const status = ref<'' | 'active' | 'revoked'>('');
@@ -89,13 +96,22 @@ const detailOpen = ref(false);
 const detailGrantID = ref('');
 let generation = 0;
 let controller: AbortController | undefined;
+let applicationGeneration = 0;
+let applicationController: AbortController | undefined;
+let applicationSearchTimer: ReturnType<typeof setTimeout> | undefined;
 
-const applicationOptions = computed(() =>
-  applications.value.map((item) => ({
+const applicationOptions = computed(() => {
+  const options = [...applications.value];
+  if (
+    selectedApplication.value &&
+    !options.some((item) => item.id === selectedApplication.value?.id)
+  )
+    options.unshift(selectedApplication.value);
+  return options.map((item) => ({
     label: `${item.name}（${item.code}）`,
     value: item.id,
-  })),
-);
+  }));
+});
 const selectedGrant = computed(() =>
   grants.value.find((item) => item.application_id === applicationID.value),
 );
@@ -127,10 +143,87 @@ function showDetail(record: TenantApplicationGrant) {
   detailOpen.value = true;
 }
 
-function loadApplicationOptions(signal: AbortSignal) {
-  if (!applicationListCapability.allowed.value) return Promise.resolve([]);
-  if (applications.value.length > 0) return Promise.resolve(applications.value);
-  return listActiveApplications(signal);
+async function loadApplicationPage(reset = false) {
+  if (!applicationListCapability.allowed.value || !props.open) return;
+  if (reset) {
+    applicationController?.abort();
+    applicationGeneration++;
+    applications.value = [];
+    applicationNextPage.value = 1;
+    applicationTotal.value = 0;
+    applicationFailure.value = '';
+  } else if (
+    applicationLoading.value ||
+    applicationFailure.value ||
+    (applicationNextPage.value > 1 &&
+      applications.value.length >= applicationTotal.value)
+  ) {
+    return;
+  }
+  const current = applicationGeneration;
+  const currentController = new AbortController();
+  applicationController = currentController;
+  applicationLoading.value = true;
+  try {
+    const result = await pageActiveApplications(
+      {
+        keyword: applicationKeyword.value,
+        page: applicationNextPage.value,
+        page_size: 50,
+      },
+      currentController.signal,
+    );
+    if (current !== applicationGeneration || currentController.signal.aborted)
+      return;
+    if (result.items.length === 0 && applications.value.length < result.total)
+      throw new Error('应用候选未返回完整数据，请重试');
+    applications.value = [...applications.value, ...result.items];
+    applicationTotal.value = result.total;
+    applicationNextPage.value++;
+    applicationFailure.value = '';
+  } catch (error) {
+    if (current === applicationGeneration && !currentController.signal.aborted)
+      applicationFailure.value =
+        error instanceof Error ? error.message : '应用候选加载失败';
+  } finally {
+    if (current === applicationGeneration) {
+      applicationLoading.value = false;
+      applicationController = undefined;
+    }
+  }
+}
+
+function searchApplications(value: string) {
+  if (applicationSearchTimer) clearTimeout(applicationSearchTimer);
+  applicationController?.abort();
+  applicationGeneration++;
+  applicationLoading.value = false;
+  applicationKeyword.value = value.trim();
+  applications.value = [];
+  applicationNextPage.value = 1;
+  applicationTotal.value = 0;
+  applicationFailure.value = '';
+  applicationSearchTimer = setTimeout(() => {
+    applicationSearchTimer = undefined;
+    void loadApplicationPage(true);
+  }, 250);
+}
+
+function loadMoreApplications(event: Event) {
+  const target = event.target as HTMLElement;
+  if (target.scrollTop + target.clientHeight >= target.scrollHeight - 24)
+    void loadApplicationPage();
+}
+
+function selectApplication(value: unknown) {
+  selectedApplication.value = applications.value.find(
+    (item) => item.id === value,
+  );
+}
+
+function retryApplicationOptions() {
+  applicationFailure.value = '';
+  void loadApplicationPage();
 }
 
 async function load() {
@@ -142,24 +235,20 @@ async function load() {
   loading.value = true;
   failure.value = '';
   try {
-    const [grantPage, options] = await Promise.all([
-      pageTenantApplicationGrants(
-        {
-          keyword: keyword.value,
-          page: page.value,
-          page_size: pageSize.value,
-          sort: [{ direction: 'asc', field: 'application_name' }],
-          statuses: status.value ? [status.value] : [],
-          tenant_id: props.tenant.id,
-        },
-        currentController.signal,
-      ),
-      loadApplicationOptions(currentController.signal),
-    ]);
+    const grantPage = await pageTenantApplicationGrants(
+      {
+        keyword: keyword.value,
+        page: page.value,
+        page_size: pageSize.value,
+        sort: [{ direction: 'asc', field: 'application_name' }],
+        statuses: status.value ? [status.value] : [],
+        tenant_id: props.tenant.id,
+      },
+      currentController.signal,
+    );
     if (current !== generation) return;
     grants.value = grantPage.items;
     total.value = grantPage.total;
-    applications.value = options;
   } catch (error) {
     if (current === generation)
       failure.value =
@@ -240,6 +329,7 @@ watch(
     () => props.open,
     () => props.tenant?.id,
     () => listCapability.allowed.value,
+    () => applicationListCapability.allowed.value,
   ],
   ([open, , allowed]) => {
     if (open && allowed) {
@@ -247,14 +337,24 @@ watch(
       keyword.value = '';
       status.value = '';
       applicationID.value = '';
+      selectedApplication.value = undefined;
+      applicationKeyword.value = '';
       validity.value = undefined;
-      applications.value = [];
       void load();
+      if (applicationListCapability.allowed.value)
+        void loadApplicationPage(true);
     } else {
       generation++;
       controller?.abort();
       controller = undefined;
       grants.value = [];
+      applicationGeneration++;
+      applicationController?.abort();
+      applicationController = undefined;
+      if (applicationSearchTimer) clearTimeout(applicationSearchTimer);
+      applicationSearchTimer = undefined;
+      applications.value = [];
+      applicationFailure.value = '';
     }
   },
   { immediate: true },
@@ -263,6 +363,9 @@ watch(
 onScopeDispose(() => {
   generation++;
   controller?.abort();
+  applicationGeneration++;
+  applicationController?.abort();
+  if (applicationSearchTimer) clearTimeout(applicationSearchTimer);
 });
 </script>
 
@@ -293,15 +396,36 @@ onScopeDispose(() => {
       class="mb-4"
       layout="inline"
     >
+      <Alert
+        v-if="applicationFailure"
+        class="mb-3 w-full"
+        :message="applicationFailure"
+        show-icon
+        type="error"
+      >
+        <template #action>
+          <Button size="small" @click="retryApplicationOptions">重试</Button>
+        </template>
+      </Alert>
       <FormItem label="应用" required>
         <Select
           v-model:value="applicationID"
           :disabled="saving"
+          :filter-option="false"
+          :loading="applicationLoading"
           :options="applicationOptions"
-          placeholder="选择应用"
+          placeholder="搜索应用名称或编码"
           show-search
           style="width: 260px"
-        />
+          @change="selectApplication"
+          @popup-scroll="loadMoreApplications"
+          @search="searchApplications"
+        >
+          <template #notFoundContent>
+            <Spin v-if="applicationLoading" size="small" />
+            <span v-else>没有匹配的启用应用</span>
+          </template>
+        </Select>
       </FormItem>
       <FormItem label="有效期">
         <DatePicker.RangePicker

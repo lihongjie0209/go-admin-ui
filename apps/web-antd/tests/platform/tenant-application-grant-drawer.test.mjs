@@ -10,7 +10,7 @@ const state = vi.hoisted(() => ({
   evaluate: vi.fn(),
   find: vi.fn(),
   grant: vi.fn(),
-  listApplications: vi.fn(),
+  pageApplications: vi.fn(),
   page: vi.fn(),
   revoke: vi.fn(),
   success: vi.fn(),
@@ -25,7 +25,7 @@ vi.mock('../../src/api/go', async (loadOriginal) => ({
 vi.mock('#/modules/platform/tenant-application-grants', () => ({
   findTenantApplicationGrant: state.find,
   grantTenantApplication: state.grant,
-  listActiveApplications: state.listApplications,
+  pageActiveApplications: state.pageApplications,
   pageTenantApplicationGrants: state.page,
   revokeTenantApplication: state.revoke,
 }));
@@ -117,6 +117,7 @@ vi.mock('ant-design-vue', () => {
     }),
     Select,
     Space: Box,
+    Spin: Box,
     Table,
     Tag: Box,
     message: { error: vi.fn(), success: state.success },
@@ -191,9 +192,19 @@ beforeEach(() => {
     page_size: 20,
     total: 1,
   });
-  state.listApplications.mockResolvedValue([
-    { code: 'console', id: 'application-1', name: '管理台', status: 'active' },
-  ]);
+  state.pageApplications.mockResolvedValue({
+    items: [
+      {
+        code: 'console',
+        id: 'application-1',
+        name: '管理台',
+        status: 'active',
+      },
+    ],
+    page: 1,
+    page_size: 50,
+    total: 1,
+  });
   state.find.mockResolvedValue(grant);
   state.grant.mockResolvedValue(grant);
   state.revoke.mockResolvedValue(undefined);

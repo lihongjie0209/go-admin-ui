@@ -5,7 +5,7 @@ import {
   getTenantApplicationGrant,
   grantTenantApplication,
   grantVersion,
-  listActiveApplications,
+  pageActiveApplications,
   pageTenantApplicationGrants,
   revokeTenantApplication,
 } from '../../src/modules/platform/tenant-application-grants';
@@ -54,80 +54,32 @@ it('详情请求同时携带租户和授权记录边界并支持取消', async (
   );
 });
 
-it('只加载启用应用作为授权候选', async () => {
+it('按关键词分页加载启用应用作为授权候选', async () => {
   const signal = new AbortController().signal;
-  api.post.mockResolvedValue({ items: [{ id: 'application-1' }], total: 1 });
-  await expect(listActiveApplications(signal)).resolves.toEqual([
-    { id: 'application-1' },
-  ]);
+  const result = {
+    items: [{ id: 'application-1' }],
+    page: 2,
+    page_size: 50,
+    total: 101,
+  };
+  api.post.mockResolvedValue(result);
+  await expect(
+    pageActiveApplications(
+      { keyword: 'console', page: 2, page_size: 50 },
+      signal,
+    ),
+  ).resolves.toBe(result);
   expect(api.post).toHaveBeenCalledWith(
     '/applications/page',
     {
-      page: 1,
-      page_size: 200,
-      sort: [{ direction: 'asc', field: 'name' }],
-      statuses: ['active'],
-    },
-    { signal },
-  );
-});
-
-it('继续加载后续页，避免超过 200 个应用时授权候选缺失', async () => {
-  const firstPage = Array.from({ length: 200 }, (_, index) => ({
-    id: `application-${index}`,
-  }));
-  api.post
-    .mockResolvedValueOnce({ items: firstPage, total: 201 })
-    .mockResolvedValueOnce({ items: [{ id: 'application-200' }], total: 201 });
-  const signal = new AbortController().signal;
-
-  const result = await listActiveApplications(signal);
-
-  expect(result).toHaveLength(201);
-  expect(result.at(-1)).toEqual({ id: 'application-200' });
-  expect(api.post).toHaveBeenNthCalledWith(
-    2,
-    '/applications/page',
-    {
+      keyword: 'console',
       page: 2,
-      page_size: 200,
+      page_size: 50,
       sort: [{ direction: 'asc', field: 'name' }],
       statuses: ['active'],
     },
     { signal },
   );
-});
-
-it('取消后不继续分页，候选超出上限时明确失败', async () => {
-  const controller = new AbortController();
-  api.post.mockImplementationOnce(async () => {
-    controller.abort();
-    return { items: [{ id: 'application-1' }], total: 201 };
-  });
-  await expect(listActiveApplications(controller.signal)).rejects.toMatchObject(
-    {
-      name: 'AbortError',
-    },
-  );
-  expect(api.post).toHaveBeenCalledTimes(1);
-
-  api.post.mockReset();
-  api.post.mockResolvedValue({ items: [], total: 10_001 });
-  await expect(
-    listActiveApplications(new AbortController().signal),
-  ).rejects.toThrow('应用候选超过 10000 个');
-  expect(api.post).toHaveBeenCalledTimes(1);
-});
-
-it('分页数据提前结束时明确失败，不把残缺候选误当作完整列表', async () => {
-  api.post
-    .mockResolvedValueOnce({ items: [{ id: 'application-1' }], total: 2 })
-    .mockResolvedValueOnce({ items: [], total: 2 });
-
-  await expect(listActiveApplications()).rejects.toThrow(
-    '应用候选分页未返回完整数据',
-  );
-  expect(api.post).toHaveBeenCalledTimes(2);
 });
 
 it('新授权使用版本零，重新授权使用现有记录版本', () => {
